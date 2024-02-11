@@ -1,15 +1,26 @@
 <script lang="ts">
-  import { T } from '@threlte/core'
-  import { ContactShadows, Float, Grid, OrbitControls } from '@threlte/extras'
+import { T, useTask } from '@threlte/core';
+import { ContactShadows, Float, Grid, HTML, OrbitControls, Portal } from '@threlte/extras';
+	import { spring } from 'svelte/motion';
+const rotation = spring([0, 0, 0], {
+  stiffness: 0.1,
+  damping: 0.25
+})
+useTask(
+  (d) => {
+    rotation.set([0, $rotation[1] +0.01, 0])
+  }
+)
 </script>
 
 <T.PerspectiveCamera
   makeDefault
   position={[-10, 10, 10]}
+  near={0.1}
+  far={100}
   fov={15}
 >
   <OrbitControls
-    autoRotate
     enableZoom={false}
     enableDamping
     autoRotateSpeed={0.5}
@@ -18,11 +29,27 @@
 </T.PerspectiveCamera>
 
 <T.DirectionalLight
-  intensity={0.8}
+  intensity={0.1}
   position.x={5}
   position.y={10}
 />
-<T.AmbientLight intensity={0.2} />
+<T.DirectionalLight
+  intensity={0.2}
+  position.x={-5}
+  position.y={10}
+/>
+<T.DirectionalLight
+  intensity={0.4}
+  position.x={-5}
+  position.y={10}
+  position.z={-5}
+/>
+<T.DirectionalLight
+  intensity={0.4}
+  position.x={5}
+  position.y={10}
+  position.z={5}
+/>
 
 <Grid
   position.y={-0.001}
@@ -41,41 +68,29 @@
 />
 
 <Float
-  floatIntensity={1}
-  floatingRange={[0, 1]}
+  floatIntensity={0.5}
+  floatingRange={[0, .1]}
 >
+
+
+  
   <T.Mesh
     position.y={1.2}
     position.z={-0.75}
-  >
+    rotation.x={$rotation[1]}
+    rotation.y={-Math.PI * 0.25}
+    >
     <T.BoxGeometry />
     <T.MeshStandardMaterial color="#0059BA" />
   </T.Mesh>
 </Float>
+<HTML position={[0, 2, 2]}
+scale={0.25}
+rotation.x={$rotation[1]}
+ occlude
+transform>
+<div class="w-auto p-3 bg-slate-500 text-lg text-violet-950"><p>This is an HTML element inside <span class="bg-slate-200 text-purple-950 w-auto font-mono p-1 rounded-sm">src/components/Scene.svelte</span></p> </div>
+</HTML>
 
-<Float
-  floatIntensity={1}
-  floatingRange={[0, 1]}
->
-  <T.Mesh
-    position={[1.2, 1.5, 0.75]}
-    rotation.x={5}
-    rotation.y={71}
-  >
-    <T.TorusKnotGeometry args={[0.5, 0.15, 100, 12, 2, 3]} />
-    <T.MeshStandardMaterial color="#F85122" />
-  </T.Mesh>
-</Float>
 
-<Float
-  floatIntensity={1}
-  floatingRange={[0, 1]}
->
-  <T.Mesh
-    position={[-1.4, 1.5, 0.75]}
-    rotation={[-5, 128, 10]}
-  >
-    <T.IcosahedronGeometry />
-    <T.MeshStandardMaterial color="#F8EBCE" />
-  </T.Mesh>
-</Float>
+ 
