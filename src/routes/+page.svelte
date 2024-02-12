@@ -1,5 +1,10 @@
 <script lang="ts">
   import App from '$lib/components/App.svelte'
+  import { base } from "$app/paths";
+	import { writable } from 'svelte/store';
+  import store from '$lib/store';
+  const expanded = writable(false)
+
 </script>
 
 <div>
