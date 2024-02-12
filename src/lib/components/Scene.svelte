@@ -3,7 +3,7 @@
   import {ContactShadows, HTML, OrbitControls} from '@threlte/extras'
   import { Collider, RigidBody, AutoColliders, World } from '@threlte/rapier'
 	import { writable } from 'svelte/store';
-  import { BoxGeometry, SphereGeometry, CylinderGeometry, ConeGeometry, Mesh } from 'three'
+  import { BoxGeometry, SphereGeometry, CylinderGeometry, ConeGeometry, Mesh, Vector3, Euler } from 'three'
   const inputText = writable("Hello, World!")
   const radius = 1
   const shapes = [
