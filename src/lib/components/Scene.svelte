@@ -82,7 +82,7 @@
   <T.Mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 1, 0]} receiveShadow>
     <T.PlaneGeometry args={[100, 100]} />
     <T.MeshStandardMaterial color={'purple'} />
-    <HTML transform position={[0, -4, -2]}>
+    <HTML transform position={[0, -4, -2]} scale={0.5}>
       <div class="w-full h-auto p-5 text-2xl text-purple-400 bg-gray-800">
        <label for="input">Input: <input bind:value={$inputText} /></label>  
       </div>
