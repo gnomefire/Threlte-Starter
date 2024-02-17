@@ -1,97 +1,72 @@
 <script lang="ts">
-  import { T } from '@threlte/core'
-  import {ContactShadows, HTML, OrbitControls} from '@threlte/extras'
+  import { T, useTask } from '@threlte/core'
+  import {ContactShadows, GLTF, HTML, OrbitControls, interactivity} from '@threlte/extras'
   import { Collider, RigidBody, AutoColliders, World } from '@threlte/rapier'
+	import { onDestroy, onMount } from 'svelte';
+	import { spring } from 'svelte/motion';
 	import { writable } from 'svelte/store';
-  import { BoxGeometry, SphereGeometry, CylinderGeometry, ConeGeometry, Mesh, Vector3, Euler } from 'three'
-  const inputText = writable("Hello, World!")
-  const radius = 1
-  const shapes = [
-    {
-      geometry: new BoxGeometry(radius * Math.random(), radius* Math.random(), radius * Math.random()),
-      autoCollider: 'cuboid',
-      color: 'hotpink'
-    },
-    {
-      geometry: new SphereGeometry(radius * Math.random()),
-      autoCollider: 'ball',
-      color: 'cyan'
-    },
-    {
-      geometry: new CylinderGeometry(radius * Math.random(), radius * Math.random(), radius * 2),
-      autoCollider: 'convexHull',
-      color: 'lime'
-    },
-    {
-      geometry: new ConeGeometry(radius* Math.random(), radius * 3, 10),
-      autoCollider: 'convexHull',
-      color: 'orange'
-    }
-  ]
-  const bodies = new Array(50).fill(0).map((_, index) => {
-    const position: Parameters<Vector3['set']> = [
-      Math.random() * 5 - 2.5,
-      Math.random() * 5,
-      Math.random() * 5 - 2.5
-    ]
-    const rotation: Parameters<Euler['set']> = [
-      Math.random() * 10,
-      Math.random() * 10,
-      Math.random() * 10
-    ]
-    const shape = shapes[Math.floor(Math.random() * shapes.length)]
-    return {
-      id: index,
-      position,
-      rotation,
-      ...shape
-    }
-  })
-</script>
+  import Threlte from './models/threlte.svelte'
+  import * as Tone from 'tone'
+  import TheFishParticle from './models/the_fish_particle.svelte'
+  import AmethystCrystal from './models/amethyst_crystal.svelte'
+  import Flock from './Flock.svelte'
+	import Goldfish from './models/goldfish.svelte';
+  const rotation= spring(0, {damping: 0.3})
+  const steps= writable(16)
+  const currentStep = writable(0)
+  const activeSteps=writable(<number[]>[])
+  const time = writable(0)
+  const state = writable(Tone.Transport.state)
 
-<World>
-
-  <T.PerspectiveCamera position={[0, 3, 10]}  makeDefault>
-  <OrbitControls target.y={1} maxPolarAngle={Math.PI *0.4} />
-  </T.PerspectiveCamera>
-  <ContactShadows />
-
-  <T.AmbientLight intensity={0.5}/>
-  <T.DirectionalLight position={[1, 1, 1]} intensity={.1} castShadow/>
-  <T.DirectionalLight position={[-1, 1, 1]} intensity={.1} castShadow/>
+//play a note every quarter-note
+//play another note every off quarter-note, by starting it "8n"
+const bpm =writable(120)
 
 
-<T.Group>
-  <RigidBody >
-    <AutoColliders shape={'cuboid'} restitution={.5}>
-      <T.Mesh position={[0, 3, 0]}>
-        <HTML position={[0, 0.5, 0]}  scale={0.25} >
-          <div class="w-full h-auto p-5 text-2xl text-purple-400 bg-gray-800">
-            <p>Output: {$inputText}</p>
-          </div>
-        </HTML>
-        <T.BoxGeometry args={[1, 1, 1]} />
-        <T.MeshStandardMaterial color={'hotpink'} />
-      </T.Mesh>
-    </AutoColliders>
-  </RigidBody>
-</T.Group>
-<T.Group>
-  <RigidBody type={'fixed'} >
-    <AutoColliders shape={'cuboid'} restitution={1.5}>
-  <T.Mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 1, 0]} receiveShadow>
-    <T.PlaneGeometry args={[100, 100]} />
-    <T.MeshStandardMaterial color={'purple'} />
-    <HTML transform position={[0, -4, -2]} scale={0.5}>
-      <div class="w-full h-auto p-5 text-2xl text-purple-400 bg-gray-800">
-       <label for="input">Input: <input bind:value={$inputText} /></label>  
-      </div>
-      
-    </HTML>
+  onMount(() => {
     
-  </T.Mesh>
-  </AutoColliders>  
-</RigidBody>
-</T.Group>
+    interactivity()
+  })
+  onDestroy(() => {
+    
+  })
+  useTask(
 
-</World>
+    () => {
+      if($state === 'started'){
+        Tone.Transport.bpm.value = $bpm 
+        $currentStep = Tone.Transport.seconds /30 * $bpm % $steps
+        
+        Tone.Transport.start();
+      }
+      else if($state === 'stopped'){
+        Tone.Transport.stop();
+        
+      }
+      else if($state === 'paused'){
+        Tone.Transport.pause();
+      
+        
+      }
+      
+      
+      
+    }, 
+  )
+  const pauseTransport = () => {
+    Tone.Transport.pause();
+    state.set(Tone.Transport.state)
+  }
+  const startTransport = () => {
+    Tone.Transport.start();
+    state.set(Tone.Transport.state)
+  }
+</script>
+<T.PerspectiveCamera position={[0, 5,20]} makeDefault fov={75} >
+  <OrbitControls target.x ={0} target.y={-1} target.z={0}/>
+</T.PerspectiveCamera>
+<T.Group position.z={-6} receiveShadow>
+ 
+  <Flock />
+</T.Group>
+<!-- <Threlte position.y={-3}  position.z={2}  scale={2} rotation.y={-Math.PI/4}/> -->

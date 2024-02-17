@@ -38,6 +38,10 @@ function compute_rest_props(props, keys) {
       rest[k] = props[k];
   return rest;
 }
+function set_store_value(store, ret, value) {
+  store.set(value);
+  return ret;
+}
 let current_component;
 function set_current_component(component) {
   current_component = component;
@@ -57,6 +61,9 @@ function setContext(key, context) {
 function getContext(key) {
   return get_current_component().$$.context.get(key);
 }
+function ensure_array_like(array_like_or_iterator) {
+  return array_like_or_iterator?.length !== void 0 ? array_like_or_iterator : Array.from(array_like_or_iterator);
+}
 const ATTR_REGEX = /[&"]/g;
 const CONTENT_REGEX = /[&<]/g;
 function escape(value, is_attr = false) {
@@ -72,6 +79,14 @@ function escape(value, is_attr = false) {
     last = i + 1;
   }
   return escaped + str.substring(last);
+}
+function each(items, fn) {
+  items = ensure_array_like(items);
+  let str = "";
+  for (let i = 0; i < items.length; i += 1) {
+    str += fn(items[i], i);
+  }
+  return str;
 }
 const missing_component = {
   $$render: () => ""
@@ -140,11 +155,13 @@ export {
   add_attribute as h,
   get_current_component as i,
   compute_rest_props as j,
-  safe_not_equal as k,
-  is_function as l,
+  each as k,
+  set_store_value as l,
   missing_component as m,
   noop as n,
   onDestroy as o,
+  safe_not_equal as p,
+  is_function as q,
   run_all as r,
   setContext as s,
   validate_component as v

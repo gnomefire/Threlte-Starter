@@ -45,6 +45,8 @@ declare module '$env/static/private' {
 	export const DOG_API_KEY: string;
 	export const DriverData: string;
 	export const EXEPATH: string;
+	export const FPS_BROWSER_APP_PROFILE_STRING: string;
+	export const FPS_BROWSER_USER_PROFILE_STRING: string;
 	export const FREESOUND_CLIENT_ID: string;
 	export const FREESOUND_CLIENT_SECRET: string;
 	export const FTSDK_DIR: string;
@@ -92,6 +94,7 @@ declare module '$env/static/private' {
 	export const npm_lifecycle_script: string;
 	export const npm_node_execpath: string;
 	export const npm_package_dependencies_gh_pages: string;
+	export const npm_package_dependencies_tone: string;
 	export const npm_package_devDependencies_autoprefixer: string;
 	export const npm_package_devDependencies_eslint: string;
 	export const npm_package_devDependencies_eslint_config_prettier: string;
@@ -252,6 +255,8 @@ declare module '$env/dynamic/private' {
 		DOG_API_KEY: string;
 		DriverData: string;
 		EXEPATH: string;
+		FPS_BROWSER_APP_PROFILE_STRING: string;
+		FPS_BROWSER_USER_PROFILE_STRING: string;
 		FREESOUND_CLIENT_ID: string;
 		FREESOUND_CLIENT_SECRET: string;
 		FTSDK_DIR: string;
@@ -299,6 +304,7 @@ declare module '$env/dynamic/private' {
 		npm_lifecycle_script: string;
 		npm_node_execpath: string;
 		npm_package_dependencies_gh_pages: string;
+		npm_package_dependencies_tone: string;
 		npm_package_devDependencies_autoprefixer: string;
 		npm_package_devDependencies_eslint: string;
 		npm_package_devDependencies_eslint_config_prettier: string;

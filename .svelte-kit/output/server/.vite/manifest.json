@@ -57,7 +57,7 @@
     "src": "src/routes/+layout.js",
     "isEntry": true,
     "css": [
-      "_app/immutable/assets/_layout.iAfsnpVR.css"
+      "_app/immutable/assets/_layout.BtAvt2Mu.css"
     ]
   },
   "src/routes/+page.svelte": {

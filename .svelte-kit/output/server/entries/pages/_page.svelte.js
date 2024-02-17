@@ -1,6 +1,7 @@
-import { b as set_current_component, r as run_all, d as current_component, s as setContext, o as onDestroy, g as getContext, c as create_ssr_component, a as subscribe, v as validate_component, f as get_store_value, h as add_attribute, i as get_current_component, j as compute_rest_props, e as escape$1 } from "../../chunks/ssr.js";
+import { b as set_current_component, r as run_all, d as current_component, s as setContext, o as onDestroy, g as getContext, c as create_ssr_component, a as subscribe, v as validate_component, f as get_store_value, h as add_attribute, i as get_current_component, j as compute_rest_props, k as each, e as escape$1, l as set_store_value } from "../../chunks/ssr.js";
 import { d as derived, w as writable, r as readable } from "../../chunks/index.js";
-import RAPIER, { EventQueue, RigidBodyType, ActiveEvents, ColliderDesc, ActiveCollisionTypes, CoefficientCombineRule } from "@dimforge/rapier3d-compat";
+import { RigidBodyType } from "@dimforge/rapier3d-compat";
+import * as Tone from "tone";
 const dirty_components = [];
 const binding_callbacks = [];
 let render_callbacks = [];
@@ -35,10 +36,10 @@ function flush() {
         set_current_component(component);
         update(component.$$);
       }
-    } catch (e2) {
+    } catch (e) {
       dirty_components.length = 0;
       flushidx = 0;
-      throw e2;
+      throw e;
     }
     set_current_component(null);
     dirty_components.length = 0;
@@ -410,7 +411,7 @@ function ceilPowerOfTwo(value) {
 function floorPowerOfTwo(value) {
   return Math.pow(2, Math.floor(Math.log(value) / Math.LN2));
 }
-function setQuaternionFromProperEuler(q2, a, b, c, order) {
+function setQuaternionFromProperEuler(q, a, b, c, order) {
   const cos = Math.cos;
   const sin = Math.sin;
   const c2 = cos(b / 2);
@@ -423,22 +424,22 @@ function setQuaternionFromProperEuler(q2, a, b, c, order) {
   const s3_1 = sin((c - a) / 2);
   switch (order) {
     case "XYX":
-      q2.set(c2 * s13, s2 * c1_3, s2 * s1_3, c2 * c13);
+      q.set(c2 * s13, s2 * c1_3, s2 * s1_3, c2 * c13);
       break;
     case "YZY":
-      q2.set(s2 * s1_3, c2 * s13, s2 * c1_3, c2 * c13);
+      q.set(s2 * s1_3, c2 * s13, s2 * c1_3, c2 * c13);
       break;
     case "ZXZ":
-      q2.set(s2 * c1_3, s2 * s1_3, c2 * s13, c2 * c13);
+      q.set(s2 * c1_3, s2 * s1_3, c2 * s13, c2 * c13);
       break;
     case "XZX":
-      q2.set(c2 * s13, s2 * s3_1, s2 * c3_1, c2 * c13);
+      q.set(c2 * s13, s2 * s3_1, s2 * c3_1, c2 * c13);
       break;
     case "YXY":
-      q2.set(s2 * c3_1, c2 * s13, s2 * s3_1, c2 * c13);
+      q.set(s2 * c3_1, c2 * s13, s2 * s3_1, c2 * c13);
       break;
     case "ZYZ":
-      q2.set(s2 * s3_1, s2 * c3_1, c2 * s13, c2 * c13);
+      q.set(s2 * s3_1, s2 * c3_1, c2 * s13, c2 * c13);
       break;
     default:
       console.warn("THREE.MathUtils: .setQuaternionFromProperEuler() encountered an unknown order: " + order);
@@ -632,9 +633,9 @@ class Vector2 {
   }
   applyMatrix3(m) {
     const x = this.x, y = this.y;
-    const e2 = m.elements;
-    this.x = e2[0] * x + e2[3] * y + e2[6];
-    this.y = e2[1] * x + e2[4] * y + e2[7];
+    const e = m.elements;
+    this.x = e[0] * x + e[3] * y + e[6];
+    this.y = e[1] * x + e[4] * y + e[7];
     return this;
   }
   min(v) {
@@ -741,14 +742,14 @@ class Vector2 {
   equals(v) {
     return v.x === this.x && v.y === this.y;
   }
-  fromArray(array, offset2 = 0) {
-    this.x = array[offset2];
-    this.y = array[offset2 + 1];
+  fromArray(array, offset = 0) {
+    this.x = array[offset];
+    this.y = array[offset + 1];
     return this;
   }
-  toArray(array = [], offset2 = 0) {
-    array[offset2] = this.x;
-    array[offset2 + 1] = this.y;
+  toArray(array = [], offset = 0) {
+    array[offset] = this.x;
+    array[offset + 1] = this.y;
     return array;
   }
   fromBufferAttribute(attribute, index) {
@@ -896,8 +897,8 @@ class Matrix3 {
   }
   determinant() {
     const te = this.elements;
-    const a = te[0], b = te[1], c = te[2], d = te[3], e2 = te[4], f = te[5], g = te[6], h = te[7], i = te[8];
-    return a * e2 * i - a * f * h - b * d * i + b * f * g + c * d * h - c * e2 * g;
+    const a = te[0], b = te[1], c = te[2], d = te[3], e = te[4], f = te[5], g = te[6], h = te[7], i = te[8];
+    return a * e * i - a * f * h - b * d * i + b * f * g + c * d * h - c * e * g;
   }
   invert() {
     const te = this.elements, n11 = te[0], n21 = te[1], n31 = te[2], n12 = te[3], n22 = te[4], n32 = te[5], n13 = te[6], n23 = te[7], n33 = te[8], t11 = n33 * n22 - n32 * n23, t12 = n32 * n13 - n33 * n12, t13 = n23 * n12 - n22 * n13, det = n11 * t11 + n21 * t12 + n31 * t13;
@@ -1043,23 +1044,23 @@ class Matrix3 {
     }
     return true;
   }
-  fromArray(array, offset2 = 0) {
+  fromArray(array, offset = 0) {
     for (let i = 0; i < 9; i++) {
-      this.elements[i] = array[i + offset2];
+      this.elements[i] = array[i + offset];
     }
     return this;
   }
-  toArray(array = [], offset2 = 0) {
+  toArray(array = [], offset = 0) {
     const te = this.elements;
-    array[offset2] = te[0];
-    array[offset2 + 1] = te[1];
-    array[offset2 + 2] = te[2];
-    array[offset2 + 3] = te[3];
-    array[offset2 + 4] = te[4];
-    array[offset2 + 5] = te[5];
-    array[offset2 + 6] = te[6];
-    array[offset2 + 7] = te[7];
-    array[offset2 + 8] = te[8];
+    array[offset] = te[0];
+    array[offset + 1] = te[1];
+    array[offset + 2] = te[2];
+    array[offset + 3] = te[3];
+    array[offset + 4] = te[4];
+    array[offset + 5] = te[5];
+    array[offset + 6] = te[6];
+    array[offset + 7] = te[7];
+    array[offset + 8] = te[8];
     return array;
   }
   clone() {
@@ -1674,27 +1675,27 @@ class Vector4 {
   }
   applyMatrix4(m) {
     const x = this.x, y = this.y, z = this.z, w = this.w;
-    const e2 = m.elements;
-    this.x = e2[0] * x + e2[4] * y + e2[8] * z + e2[12] * w;
-    this.y = e2[1] * x + e2[5] * y + e2[9] * z + e2[13] * w;
-    this.z = e2[2] * x + e2[6] * y + e2[10] * z + e2[14] * w;
-    this.w = e2[3] * x + e2[7] * y + e2[11] * z + e2[15] * w;
+    const e = m.elements;
+    this.x = e[0] * x + e[4] * y + e[8] * z + e[12] * w;
+    this.y = e[1] * x + e[5] * y + e[9] * z + e[13] * w;
+    this.z = e[2] * x + e[6] * y + e[10] * z + e[14] * w;
+    this.w = e[3] * x + e[7] * y + e[11] * z + e[15] * w;
     return this;
   }
   divideScalar(scalar) {
     return this.multiplyScalar(1 / scalar);
   }
-  setAxisAngleFromQuaternion(q2) {
-    this.w = 2 * Math.acos(q2.w);
-    const s = Math.sqrt(1 - q2.w * q2.w);
+  setAxisAngleFromQuaternion(q) {
+    this.w = 2 * Math.acos(q.w);
+    const s = Math.sqrt(1 - q.w * q.w);
     if (s < 1e-4) {
       this.x = 1;
       this.y = 0;
       this.z = 0;
     } else {
-      this.x = q2.x / s;
-      this.y = q2.y / s;
-      this.z = q2.z / s;
+      this.x = q.x / s;
+      this.y = q.y / s;
+      this.z = q.z / s;
     }
     return this;
   }
@@ -1858,18 +1859,18 @@ class Vector4 {
   equals(v) {
     return v.x === this.x && v.y === this.y && v.z === this.z && v.w === this.w;
   }
-  fromArray(array, offset2 = 0) {
-    this.x = array[offset2];
-    this.y = array[offset2 + 1];
-    this.z = array[offset2 + 2];
-    this.w = array[offset2 + 3];
+  fromArray(array, offset = 0) {
+    this.x = array[offset];
+    this.y = array[offset + 1];
+    this.z = array[offset + 2];
+    this.w = array[offset + 3];
     return this;
   }
-  toArray(array = [], offset2 = 0) {
-    array[offset2] = this.x;
-    array[offset2 + 1] = this.y;
-    array[offset2 + 2] = this.z;
-    array[offset2 + 3] = this.w;
+  toArray(array = [], offset = 0) {
+    array[offset] = this.x;
+    array[offset + 1] = this.y;
+    array[offset + 2] = this.z;
+    array[offset + 3] = this.w;
     return array;
   }
   fromBufferAttribute(attribute, index) {
@@ -2290,15 +2291,15 @@ class Quaternion {
     }
     return this.normalize();
   }
-  angleTo(q2) {
-    return 2 * Math.acos(Math.abs(clamp(this.dot(q2), -1, 1)));
+  angleTo(q) {
+    return 2 * Math.acos(Math.abs(clamp(this.dot(q), -1, 1)));
   }
-  rotateTowards(q2, step) {
-    const angle = this.angleTo(q2);
+  rotateTowards(q, step) {
+    const angle = this.angleTo(q);
     if (angle === 0)
       return this;
     const t = Math.min(1, step / angle);
-    this.slerp(q2, t);
+    this.slerp(q, t);
     return this;
   }
   identity() {
@@ -2340,11 +2341,11 @@ class Quaternion {
     this._onChangeCallback();
     return this;
   }
-  multiply(q2) {
-    return this.multiplyQuaternions(this, q2);
+  multiply(q) {
+    return this.multiplyQuaternions(this, q);
   }
-  premultiply(q2) {
-    return this.multiplyQuaternions(q2, this);
+  premultiply(q) {
+    return this.multiplyQuaternions(q, this);
   }
   multiplyQuaternions(a, b) {
     const qax = a._x, qay = a._y, qaz = a._z, qaw = a._w;
@@ -2419,19 +2420,19 @@ class Quaternion {
   equals(quaternion) {
     return quaternion._x === this._x && quaternion._y === this._y && quaternion._z === this._z && quaternion._w === this._w;
   }
-  fromArray(array, offset2 = 0) {
-    this._x = array[offset2];
-    this._y = array[offset2 + 1];
-    this._z = array[offset2 + 2];
-    this._w = array[offset2 + 3];
+  fromArray(array, offset = 0) {
+    this._x = array[offset];
+    this._y = array[offset + 1];
+    this._z = array[offset + 2];
+    this._w = array[offset + 3];
     this._onChangeCallback();
     return this;
   }
-  toArray(array = [], offset2 = 0) {
-    array[offset2] = this._x;
-    array[offset2 + 1] = this._y;
-    array[offset2 + 2] = this._z;
-    array[offset2 + 3] = this._w;
+  toArray(array = [], offset = 0) {
+    array[offset] = this._x;
+    array[offset + 1] = this._y;
+    array[offset + 2] = this._z;
+    array[offset + 3] = this._w;
     return array;
   }
   fromBufferAttribute(attribute, index) {
@@ -2595,10 +2596,10 @@ class Vector3 {
   }
   applyMatrix3(m) {
     const x = this.x, y = this.y, z = this.z;
-    const e2 = m.elements;
-    this.x = e2[0] * x + e2[3] * y + e2[6] * z;
-    this.y = e2[1] * x + e2[4] * y + e2[7] * z;
-    this.z = e2[2] * x + e2[5] * y + e2[8] * z;
+    const e = m.elements;
+    this.x = e[0] * x + e[3] * y + e[6] * z;
+    this.y = e[1] * x + e[4] * y + e[7] * z;
+    this.z = e[2] * x + e[5] * y + e[8] * z;
     return this;
   }
   applyNormalMatrix(m) {
@@ -2606,16 +2607,16 @@ class Vector3 {
   }
   applyMatrix4(m) {
     const x = this.x, y = this.y, z = this.z;
-    const e2 = m.elements;
-    const w = 1 / (e2[3] * x + e2[7] * y + e2[11] * z + e2[15]);
-    this.x = (e2[0] * x + e2[4] * y + e2[8] * z + e2[12]) * w;
-    this.y = (e2[1] * x + e2[5] * y + e2[9] * z + e2[13]) * w;
-    this.z = (e2[2] * x + e2[6] * y + e2[10] * z + e2[14]) * w;
+    const e = m.elements;
+    const w = 1 / (e[3] * x + e[7] * y + e[11] * z + e[15]);
+    this.x = (e[0] * x + e[4] * y + e[8] * z + e[12]) * w;
+    this.y = (e[1] * x + e[5] * y + e[9] * z + e[13]) * w;
+    this.z = (e[2] * x + e[6] * y + e[10] * z + e[14]) * w;
     return this;
   }
-  applyQuaternion(q2) {
+  applyQuaternion(q) {
     const vx = this.x, vy = this.y, vz = this.z;
-    const qx = q2.x, qy = q2.y, qz = q2.z, qw = q2.w;
+    const qx = q.x, qy = q.y, qz = q.z, qw = q.w;
     const tx = 2 * (qy * vz - qz * vy);
     const ty = 2 * (qz * vx - qx * vz);
     const tz = 2 * (qx * vy - qy * vx);
@@ -2632,10 +2633,10 @@ class Vector3 {
   }
   transformDirection(m) {
     const x = this.x, y = this.y, z = this.z;
-    const e2 = m.elements;
-    this.x = e2[0] * x + e2[4] * y + e2[8] * z;
-    this.y = e2[1] * x + e2[5] * y + e2[9] * z;
-    this.z = e2[2] * x + e2[6] * y + e2[10] * z;
+    const e = m.elements;
+    this.x = e[0] * x + e[4] * y + e[8] * z;
+    this.y = e[1] * x + e[5] * y + e[9] * z;
+    this.z = e[2] * x + e[6] * y + e[10] * z;
     return this.normalize();
   }
   divide(v) {
@@ -2781,27 +2782,27 @@ class Vector3 {
   setFromSpherical(s) {
     return this.setFromSphericalCoords(s.radius, s.phi, s.theta);
   }
-  setFromSphericalCoords(radius2, phi, theta) {
-    const sinPhiRadius = Math.sin(phi) * radius2;
+  setFromSphericalCoords(radius, phi, theta) {
+    const sinPhiRadius = Math.sin(phi) * radius;
     this.x = sinPhiRadius * Math.sin(theta);
-    this.y = Math.cos(phi) * radius2;
+    this.y = Math.cos(phi) * radius;
     this.z = sinPhiRadius * Math.cos(theta);
     return this;
   }
   setFromCylindrical(c) {
     return this.setFromCylindricalCoords(c.radius, c.theta, c.y);
   }
-  setFromCylindricalCoords(radius2, theta, y) {
-    this.x = radius2 * Math.sin(theta);
+  setFromCylindricalCoords(radius, theta, y) {
+    this.x = radius * Math.sin(theta);
     this.y = y;
-    this.z = radius2 * Math.cos(theta);
+    this.z = radius * Math.cos(theta);
     return this;
   }
   setFromMatrixPosition(m) {
-    const e2 = m.elements;
-    this.x = e2[12];
-    this.y = e2[13];
-    this.z = e2[14];
+    const e = m.elements;
+    this.x = e[12];
+    this.y = e[13];
+    this.z = e[14];
     return this;
   }
   setFromMatrixScale(m) {
@@ -2819,10 +2820,10 @@ class Vector3 {
   setFromMatrix3Column(m, index) {
     return this.fromArray(m.elements, index * 3);
   }
-  setFromEuler(e2) {
-    this.x = e2._x;
-    this.y = e2._y;
-    this.z = e2._z;
+  setFromEuler(e) {
+    this.x = e._x;
+    this.y = e._y;
+    this.z = e._z;
     return this;
   }
   setFromColor(c) {
@@ -2834,16 +2835,16 @@ class Vector3 {
   equals(v) {
     return v.x === this.x && v.y === this.y && v.z === this.z;
   }
-  fromArray(array, offset2 = 0) {
-    this.x = array[offset2];
-    this.y = array[offset2 + 1];
-    this.z = array[offset2 + 2];
+  fromArray(array, offset = 0) {
+    this.x = array[offset];
+    this.y = array[offset + 1];
+    this.z = array[offset + 2];
     return this;
   }
-  toArray(array = [], offset2 = 0) {
-    array[offset2] = this.x;
-    array[offset2 + 1] = this.y;
-    array[offset2 + 2] = this.z;
+  toArray(array = [], offset = 0) {
+    array[offset] = this.x;
+    array[offset + 1] = this.y;
+    array[offset + 2] = this.z;
     return array;
   }
   fromBufferAttribute(attribute, index) {
@@ -2907,8 +2908,8 @@ class Box3 {
     }
     return this;
   }
-  setFromCenterAndSize(center, size2) {
-    const halfSize = _vector$b.copy(size2).multiplyScalar(0.5);
+  setFromCenterAndSize(center, size) {
+    const halfSize = _vector$b.copy(size).multiplyScalar(0.5);
     this.min.copy(center).sub(halfSize);
     this.max.copy(center).add(halfSize);
     return this;
@@ -3129,9 +3130,9 @@ class Box3 {
     this.setFromPoints(_points);
     return this;
   }
-  translate(offset2) {
-    this.min.add(offset2);
-    this.max.add(offset2);
+  translate(offset) {
+    this.min.add(offset);
+    this.max.add(offset);
     return this;
   }
   equals(box) {
@@ -3177,13 +3178,13 @@ const _box$3 = /* @__PURE__ */ new Box3();
 const _v1$6 = /* @__PURE__ */ new Vector3();
 const _v2$3 = /* @__PURE__ */ new Vector3();
 class Sphere {
-  constructor(center = new Vector3(), radius2 = -1) {
+  constructor(center = new Vector3(), radius = -1) {
     this.center = center;
-    this.radius = radius2;
+    this.radius = radius;
   }
-  set(center, radius2) {
+  set(center, radius) {
     this.center.copy(center);
-    this.radius = radius2;
+    this.radius = radius;
     return this;
   }
   setFromPoints(points, optionalCenter) {
@@ -3252,8 +3253,8 @@ class Sphere {
     this.radius = this.radius * matrix.getMaxScaleOnAxis();
     return this;
   }
-  translate(offset2) {
-    this.center.add(offset2);
+  translate(offset) {
+    this.center.add(offset);
     return this;
   }
   expandByPoint(point) {
@@ -3721,10 +3722,10 @@ class Matrix4 {
     const x = euler.x, y = euler.y, z = euler.z;
     const a = Math.cos(x), b = Math.sin(x);
     const c = Math.cos(y), d = Math.sin(y);
-    const e2 = Math.cos(z), f = Math.sin(z);
+    const e = Math.cos(z), f = Math.sin(z);
     if (euler.order === "XYZ") {
-      const ae = a * e2, af = a * f, be = b * e2, bf = b * f;
-      te[0] = c * e2;
+      const ae = a * e, af = a * f, be = b * e, bf = b * f;
+      te[0] = c * e;
       te[4] = -c * f;
       te[8] = d;
       te[1] = af + be * d;
@@ -3734,30 +3735,30 @@ class Matrix4 {
       te[6] = be + af * d;
       te[10] = a * c;
     } else if (euler.order === "YXZ") {
-      const ce = c * e2, cf = c * f, de = d * e2, df = d * f;
+      const ce = c * e, cf = c * f, de = d * e, df = d * f;
       te[0] = ce + df * b;
       te[4] = de * b - cf;
       te[8] = a * d;
       te[1] = a * f;
-      te[5] = a * e2;
+      te[5] = a * e;
       te[9] = -b;
       te[2] = cf * b - de;
       te[6] = df + ce * b;
       te[10] = a * c;
     } else if (euler.order === "ZXY") {
-      const ce = c * e2, cf = c * f, de = d * e2, df = d * f;
+      const ce = c * e, cf = c * f, de = d * e, df = d * f;
       te[0] = ce - df * b;
       te[4] = -a * f;
       te[8] = de + cf * b;
       te[1] = cf + de * b;
-      te[5] = a * e2;
+      te[5] = a * e;
       te[9] = df - ce * b;
       te[2] = -a * d;
       te[6] = b;
       te[10] = a * c;
     } else if (euler.order === "ZYX") {
-      const ae = a * e2, af = a * f, be = b * e2, bf = b * f;
-      te[0] = c * e2;
+      const ae = a * e, af = a * f, be = b * e, bf = b * f;
+      te[0] = c * e;
       te[4] = be * d - af;
       te[8] = ae * d + bf;
       te[1] = c * f;
@@ -3768,25 +3769,25 @@ class Matrix4 {
       te[10] = a * c;
     } else if (euler.order === "YZX") {
       const ac = a * c, ad = a * d, bc = b * c, bd = b * d;
-      te[0] = c * e2;
+      te[0] = c * e;
       te[4] = bd - ac * f;
       te[8] = bc * f + ad;
       te[1] = f;
-      te[5] = a * e2;
-      te[9] = -b * e2;
-      te[2] = -d * e2;
+      te[5] = a * e;
+      te[9] = -b * e;
+      te[2] = -d * e;
       te[6] = ad * f + bc;
       te[10] = ac - bd * f;
     } else if (euler.order === "XZY") {
       const ac = a * c, ad = a * d, bc = b * c, bd = b * d;
-      te[0] = c * e2;
+      te[0] = c * e;
       te[4] = -f;
-      te[8] = d * e2;
+      te[8] = d * e;
       te[1] = ac * f + bd;
-      te[5] = a * e2;
+      te[5] = a * e;
       te[9] = ad * f - bc;
       te[2] = bc * f - ad;
-      te[6] = b * e2;
+      te[6] = b * e;
       te[10] = bd * f + ac;
     }
     te[3] = 0;
@@ -3798,8 +3799,8 @@ class Matrix4 {
     te[15] = 1;
     return this;
   }
-  makeRotationFromQuaternion(q2) {
-    return this.compose(_zero, q2, _one);
+  makeRotationFromQuaternion(q) {
+    return this.compose(_zero, q, _one);
   }
   lookAt(eye, target, up) {
     const te = this.elements;
@@ -4289,30 +4290,30 @@ class Matrix4 {
     }
     return true;
   }
-  fromArray(array, offset2 = 0) {
+  fromArray(array, offset = 0) {
     for (let i = 0; i < 16; i++) {
-      this.elements[i] = array[i + offset2];
+      this.elements[i] = array[i + offset];
     }
     return this;
   }
-  toArray(array = [], offset2 = 0) {
+  toArray(array = [], offset = 0) {
     const te = this.elements;
-    array[offset2] = te[0];
-    array[offset2 + 1] = te[1];
-    array[offset2 + 2] = te[2];
-    array[offset2 + 3] = te[3];
-    array[offset2 + 4] = te[4];
-    array[offset2 + 5] = te[5];
-    array[offset2 + 6] = te[6];
-    array[offset2 + 7] = te[7];
-    array[offset2 + 8] = te[8];
-    array[offset2 + 9] = te[9];
-    array[offset2 + 10] = te[10];
-    array[offset2 + 11] = te[11];
-    array[offset2 + 12] = te[12];
-    array[offset2 + 13] = te[13];
-    array[offset2 + 14] = te[14];
-    array[offset2 + 15] = te[15];
+    array[offset] = te[0];
+    array[offset + 1] = te[1];
+    array[offset + 2] = te[2];
+    array[offset + 3] = te[3];
+    array[offset + 4] = te[4];
+    array[offset + 5] = te[5];
+    array[offset + 6] = te[6];
+    array[offset + 7] = te[7];
+    array[offset + 8] = te[8];
+    array[offset + 9] = te[9];
+    array[offset + 10] = te[10];
+    array[offset + 11] = te[11];
+    array[offset + 12] = te[12];
+    array[offset + 13] = te[13];
+    array[offset + 14] = te[14];
+    array[offset + 15] = te[15];
     return array;
   }
 }
@@ -4454,8 +4455,8 @@ class Euler {
       this._onChangeCallback();
     return this;
   }
-  setFromQuaternion(q2, order, update2) {
-    _matrix$1.makeRotationFromQuaternion(q2);
+  setFromQuaternion(q, order, update2) {
+    _matrix$1.makeRotationFromQuaternion(q);
     return this.setFromRotationMatrix(_matrix$1, order, update2);
   }
   setFromVector3(v, order = this._order) {
@@ -4477,11 +4478,11 @@ class Euler {
     this._onChangeCallback();
     return this;
   }
-  toArray(array = [], offset2 = 0) {
-    array[offset2] = this._x;
-    array[offset2 + 1] = this._y;
-    array[offset2 + 2] = this._z;
-    array[offset2 + 3] = this._order;
+  toArray(array = [], offset = 0) {
+    array[offset] = this._x;
+    array[offset + 1] = this._y;
+    array[offset + 2] = this._z;
+    array[offset + 3] = this._order;
     return array;
   }
   _onChange(callback) {
@@ -4619,8 +4620,8 @@ class Object3D extends EventDispatcher {
     this.matrix.premultiply(matrix);
     this.matrix.decompose(this.position, this.quaternion, this.scale);
   }
-  applyQuaternion(q2) {
-    this.quaternion.premultiply(q2);
+  applyQuaternion(q) {
+    this.quaternion.premultiply(q);
     return this;
   }
   setRotationFromAxisAngle(axis, angle) {
@@ -4632,8 +4633,8 @@ class Object3D extends EventDispatcher {
   setRotationFromMatrix(m) {
     this.quaternion.setFromRotationMatrix(m);
   }
-  setRotationFromQuaternion(q2) {
-    this.quaternion.copy(q2);
+  setRotationFromQuaternion(q) {
+    this.quaternion.copy(q);
   }
   rotateOnAxis(axis, angle) {
     _q1.setFromAxisAngle(axis, angle);
@@ -4800,8 +4801,8 @@ class Object3D extends EventDispatcher {
   }
   getWorldDirection(target) {
     this.updateWorldMatrix(true, false);
-    const e2 = this.matrixWorld.elements;
-    return target.set(e2[8], e2[9], e2[10]).normalize();
+    const e = this.matrixWorld.elements;
+    return target.set(e[8], e[9], e[10]).normalize();
   }
   raycast() {
   }
@@ -5052,8 +5053,8 @@ class Object3D extends EventDispatcher {
     return output;
     function extractFromCache(cache) {
       const values = [];
-      for (const key2 in cache) {
-        const data = cache[key2];
+      for (const key in cache) {
+        const data = cache[key];
         delete data.metadata;
         values.push(data);
       }
@@ -5429,17 +5430,17 @@ const _colorKeywords = {
 };
 const _hslA = { h: 0, s: 0, l: 0 };
 const _hslB = { h: 0, s: 0, l: 0 };
-function hue2rgb(p, q2, t) {
+function hue2rgb(p, q, t) {
   if (t < 0)
     t += 1;
   if (t > 1)
     t -= 1;
   if (t < 1 / 6)
-    return p + (q2 - p) * 6 * t;
+    return p + (q - p) * 6 * t;
   if (t < 1 / 2)
-    return q2;
+    return q;
   if (t < 2 / 3)
-    return p + (q2 - p) * 6 * (2 / 3 - t);
+    return p + (q - p) * 6 * (2 / 3 - t);
   return p;
 }
 class Color {
@@ -5494,10 +5495,10 @@ class Color {
       this.r = this.g = this.b = l;
     } else {
       const p = l <= 0.5 ? l * (1 + s) : l + s - l * s;
-      const q2 = 2 * l - p;
-      this.r = hue2rgb(q2, p, h + 1 / 3);
-      this.g = hue2rgb(q2, p, h);
-      this.b = hue2rgb(q2, p, h - 1 / 3);
+      const q = 2 * l - p;
+      this.r = hue2rgb(q, p, h + 1 / 3);
+      this.g = hue2rgb(q, p, h);
+      this.b = hue2rgb(q, p, h - 1 / 3);
     }
     ColorManagement.toWorkingColorSpace(this, colorSpace);
     return this;
@@ -5554,15 +5555,15 @@ class Color {
       }
     } else if (m = /^\#([A-Fa-f\d]+)$/.exec(style)) {
       const hex = m[1];
-      const size2 = hex.length;
-      if (size2 === 3) {
+      const size = hex.length;
+      if (size === 3) {
         return this.setRGB(
           parseInt(hex.charAt(0), 16) / 15,
           parseInt(hex.charAt(1), 16) / 15,
           parseInt(hex.charAt(2), 16) / 15,
           colorSpace
         );
-      } else if (size2 === 6) {
+      } else if (size === 6) {
         return this.setHex(parseInt(hex, 16), colorSpace);
       } else {
         console.warn("THREE.Color: Invalid hex color " + style);
@@ -5732,25 +5733,25 @@ class Color {
   }
   applyMatrix3(m) {
     const r = this.r, g = this.g, b = this.b;
-    const e2 = m.elements;
-    this.r = e2[0] * r + e2[3] * g + e2[6] * b;
-    this.g = e2[1] * r + e2[4] * g + e2[7] * b;
-    this.b = e2[2] * r + e2[5] * g + e2[8] * b;
+    const e = m.elements;
+    this.r = e[0] * r + e[3] * g + e[6] * b;
+    this.g = e[1] * r + e[4] * g + e[7] * b;
+    this.b = e[2] * r + e[5] * g + e[8] * b;
     return this;
   }
   equals(c) {
     return c.r === this.r && c.g === this.g && c.b === this.b;
   }
-  fromArray(array, offset2 = 0) {
-    this.r = array[offset2];
-    this.g = array[offset2 + 1];
-    this.b = array[offset2 + 2];
+  fromArray(array, offset = 0) {
+    this.r = array[offset];
+    this.g = array[offset + 1];
+    this.b = array[offset + 2];
     return this;
   }
-  toArray(array = [], offset2 = 0) {
-    array[offset2] = this.r;
-    array[offset2 + 1] = this.g;
-    array[offset2 + 2] = this.b;
+  toArray(array = [], offset = 0) {
+    array[offset] = this.r;
+    array[offset + 1] = this.g;
+    array[offset + 2] = this.b;
     return array;
   }
   fromBufferAttribute(attribute, index) {
@@ -5844,15 +5845,15 @@ class Material extends EventDispatcher {
   setValues(values) {
     if (values === void 0)
       return;
-    for (const key2 in values) {
-      const newValue = values[key2];
+    for (const key in values) {
+      const newValue = values[key];
       if (newValue === void 0) {
-        console.warn(`THREE.Material: parameter '${key2}' has value of undefined.`);
+        console.warn(`THREE.Material: parameter '${key}' has value of undefined.`);
         continue;
       }
-      const currentValue = this[key2];
+      const currentValue = this[key];
       if (currentValue === void 0) {
-        console.warn(`THREE.Material: '${key2}' is not a property of THREE.${this.type}.`);
+        console.warn(`THREE.Material: '${key}' is not a property of THREE.${this.type}.`);
         continue;
       }
       if (currentValue && currentValue.isColor) {
@@ -5860,7 +5861,7 @@ class Material extends EventDispatcher {
       } else if (currentValue && currentValue.isVector3 && (newValue && newValue.isVector3)) {
         currentValue.copy(newValue);
       } else {
-        this[key2] = newValue;
+        this[key] = newValue;
       }
     }
   }
@@ -6110,8 +6111,8 @@ class Material extends EventDispatcher {
       data.userData = this.userData;
     function extractFromCache(cache) {
       const values = [];
-      for (const key2 in cache) {
-        const data2 = cache[key2];
+      for (const key in cache) {
+        const data2 = cache[key];
         delete data2.metadata;
         values.push(data2);
       }
@@ -6247,23 +6248,23 @@ function _generateTables() {
   const baseTable = new Uint32Array(512);
   const shiftTable = new Uint32Array(512);
   for (let i = 0; i < 256; ++i) {
-    const e2 = i - 127;
-    if (e2 < -27) {
+    const e = i - 127;
+    if (e < -27) {
       baseTable[i] = 0;
       baseTable[i | 256] = 32768;
       shiftTable[i] = 24;
       shiftTable[i | 256] = 24;
-    } else if (e2 < -14) {
-      baseTable[i] = 1024 >> -e2 - 14;
-      baseTable[i | 256] = 1024 >> -e2 - 14 | 32768;
-      shiftTable[i] = -e2 - 1;
-      shiftTable[i | 256] = -e2 - 1;
-    } else if (e2 <= 15) {
-      baseTable[i] = e2 + 15 << 10;
-      baseTable[i | 256] = e2 + 15 << 10 | 32768;
+    } else if (e < -14) {
+      baseTable[i] = 1024 >> -e - 14;
+      baseTable[i | 256] = 1024 >> -e - 14 | 32768;
+      shiftTable[i] = -e - 1;
+      shiftTable[i | 256] = -e - 1;
+    } else if (e <= 15) {
+      baseTable[i] = e + 15 << 10;
+      baseTable[i | 256] = e + 15 << 10 | 32768;
       shiftTable[i] = 13;
       shiftTable[i | 256] = 13;
-    } else if (e2 < 128) {
+    } else if (e < 128) {
       baseTable[i] = 31744;
       baseTable[i | 256] = 64512;
       shiftTable[i] = 24;
@@ -6280,14 +6281,14 @@ function _generateTables() {
   const offsetTable = new Uint32Array(64);
   for (let i = 1; i < 1024; ++i) {
     let m = i << 13;
-    let e2 = 0;
+    let e = 0;
     while ((m & 8388608) === 0) {
       m <<= 1;
-      e2 -= 8388608;
+      e -= 8388608;
     }
     m &= ~8388608;
-    e2 += 947912704;
-    mantissaTable[i] = m | e2;
+    e += 947912704;
+    mantissaTable[i] = m | e;
   }
   for (let i = 1024; i < 2048; ++i) {
     mantissaTable[i] = 939524096 + (i - 1024 << 13);
@@ -6322,8 +6323,8 @@ function toHalfFloat(val) {
   val = clamp(val, -65504, 65504);
   _tables.floatView[0] = val;
   const f = _tables.uint32View[0];
-  const e2 = f >> 23 & 511;
-  return _tables.baseTable[e2] + ((f & 8388607) >> _tables.shiftTable[e2]);
+  const e = f >> 23 & 511;
+  return _tables.baseTable[e] + ((f & 8388607) >> _tables.shiftTable[e]);
 }
 function fromHalfFloat(val) {
   const m = val >> 10;
@@ -6435,8 +6436,8 @@ class BufferAttribute {
     }
     return this;
   }
-  set(value, offset2 = 0) {
-    this.array.set(value, offset2);
+  set(value, offset = 0) {
+    this.array.set(value, offset);
     return this;
   }
   getComponent(index, component) {
@@ -6780,8 +6781,8 @@ class BufferGeometry extends EventDispatcher {
     }
     return this;
   }
-  applyQuaternion(q2) {
-    _m1.makeRotationFromQuaternion(q2);
+  applyQuaternion(q) {
+    _m1.makeRotationFromQuaternion(q);
     this.applyMatrix4(_m1);
     return this;
   }
@@ -7143,9 +7144,9 @@ class BufferGeometry extends EventDispatcher {
       data.userData = this.userData;
     if (this.parameters !== void 0) {
       const parameters = this.parameters;
-      for (const key2 in parameters) {
-        if (parameters[key2] !== void 0)
-          data[key2] = parameters[key2];
+      for (const key in parameters) {
+        if (parameters[key] !== void 0)
+          data[key] = parameters[key];
       }
       return data;
     }
@@ -7158,21 +7159,21 @@ class BufferGeometry extends EventDispatcher {
       };
     }
     const attributes = this.attributes;
-    for (const key2 in attributes) {
-      const attribute = attributes[key2];
-      data.data.attributes[key2] = attribute.toJSON(data.data);
+    for (const key in attributes) {
+      const attribute = attributes[key];
+      data.data.attributes[key] = attribute.toJSON(data.data);
     }
     const morphAttributes = {};
     let hasMorphAttributes = false;
-    for (const key2 in this.morphAttributes) {
-      const attributeArray = this.morphAttributes[key2];
+    for (const key in this.morphAttributes) {
+      const attributeArray = this.morphAttributes[key];
       const array = [];
       for (let i = 0, il = attributeArray.length; i < il; i++) {
         const attribute = attributeArray[i];
         array.push(attribute.toJSON(data.data));
       }
       if (array.length > 0) {
-        morphAttributes[key2] = array;
+        morphAttributes[key] = array;
         hasMorphAttributes = true;
       }
     }
@@ -7734,9 +7735,9 @@ class ShaderMaterial extends Material {
     data.lights = this.lights;
     data.clipping = this.clipping;
     const extensions = {};
-    for (const key2 in this.extensions) {
-      if (this.extensions[key2] === true)
-        extensions[key2] = true;
+    for (const key in this.extensions) {
+      if (this.extensions[key] === true)
+        extensions[key] = true;
     }
     if (Object.keys(extensions).length > 0)
       data.extensions = extensions;
@@ -8052,10 +8053,10 @@ class CubeTexture extends Texture {
   }
 }
 class WebGLCubeRenderTarget extends WebGLRenderTarget {
-  constructor(size2 = 1, options = {}) {
-    super(size2, size2, options);
+  constructor(size = 1, options = {}) {
+    super(size, size, options);
     this.isWebGLCubeRenderTarget = true;
-    const image = { width: size2, height: size2, depth: 1 };
+    const image = { width: size, height: size, depth: 1 };
     const images = [image, image, image, image, image, image];
     if (options.encoding !== void 0) {
       warnOnce("THREE.WebGLCubeRenderTarget: option.encoding has been replaced by option.colorSpace.");
@@ -8240,8 +8241,8 @@ class Plane {
     this.constant = -referencePoint.dot(normal);
     return this;
   }
-  translate(offset2) {
-    this.constant -= offset2.dot(this.normal);
+  translate(offset) {
+    this.constant -= offset.dot(this.normal);
     return this;
   }
   equals(plane) {
@@ -8388,7 +8389,7 @@ function WebGLAttributes(gl, capabilities) {
   function createBuffer(attribute, bufferType) {
     const array = attribute.array;
     const usage = attribute.usage;
-    const size2 = array.byteLength;
+    const size = array.byteLength;
     const buffer = gl.createBuffer();
     gl.bindBuffer(bufferType, buffer);
     gl.bufferData(bufferType, array, usage);
@@ -8426,7 +8427,7 @@ function WebGLAttributes(gl, capabilities) {
       type,
       bytesPerElement: array.BYTES_PER_ELEMENT,
       version: attribute.version,
-      size: size2
+      size
     };
   }
   function updateBuffer(buffer, attribute, bufferType) {
@@ -9620,11 +9621,11 @@ function WebGLBindingStates(gl, extensions, attributes, capabilities) {
       }
     }
   }
-  function vertexAttribPointer(index, size2, type, normalized, stride, offset2, integer) {
+  function vertexAttribPointer(index, size, type, normalized, stride, offset, integer) {
     if (integer === true) {
-      gl.vertexAttribIPointer(index, size2, type, stride, offset2);
+      gl.vertexAttribIPointer(index, size, type, stride, offset);
     } else {
-      gl.vertexAttribPointer(index, size2, type, normalized, stride, offset2);
+      gl.vertexAttribPointer(index, size, type, normalized, stride, offset);
     }
   }
   function setupVertexAttributes(object, material, program, geometry) {
@@ -9648,7 +9649,7 @@ function WebGLBindingStates(gl, extensions, attributes, capabilities) {
         }
         if (geometryAttribute !== void 0) {
           const normalized = geometryAttribute.normalized;
-          const size2 = geometryAttribute.itemSize;
+          const size = geometryAttribute.itemSize;
           const attribute = attributes.get(geometryAttribute);
           if (attribute === void 0)
             continue;
@@ -9659,7 +9660,7 @@ function WebGLBindingStates(gl, extensions, attributes, capabilities) {
           if (geometryAttribute.isInterleavedBufferAttribute) {
             const data = geometryAttribute.data;
             const stride = data.stride;
-            const offset2 = geometryAttribute.offset;
+            const offset = geometryAttribute.offset;
             if (data.isInstancedInterleavedBuffer) {
               for (let i = 0; i < programAttribute.locationSize; i++) {
                 enableAttributeAndDivisor(programAttribute.location + i, data.meshPerAttribute);
@@ -9676,11 +9677,11 @@ function WebGLBindingStates(gl, extensions, attributes, capabilities) {
             for (let i = 0; i < programAttribute.locationSize; i++) {
               vertexAttribPointer(
                 programAttribute.location + i,
-                size2 / programAttribute.locationSize,
+                size / programAttribute.locationSize,
                 type,
                 normalized,
                 stride * bytesPerElement,
-                (offset2 + size2 / programAttribute.locationSize * i) * bytesPerElement,
+                (offset + size / programAttribute.locationSize * i) * bytesPerElement,
                 integer
               );
             }
@@ -9701,11 +9702,11 @@ function WebGLBindingStates(gl, extensions, attributes, capabilities) {
             for (let i = 0; i < programAttribute.locationSize; i++) {
               vertexAttribPointer(
                 programAttribute.location + i,
-                size2 / programAttribute.locationSize,
+                size / programAttribute.locationSize,
                 type,
                 normalized,
-                size2 * bytesPerElement,
-                size2 / programAttribute.locationSize * i * bytesPerElement,
+                size * bytesPerElement,
+                size / programAttribute.locationSize * i * bytesPerElement,
                 integer
               );
             }
@@ -10347,8 +10348,8 @@ class PMREMGenerator {
         cubeCamera.up.set(0, upSign[i], 0);
         cubeCamera.lookAt(0, 0, forwardSign[i]);
       }
-      const size2 = this._cubeSize;
-      _setViewport(cubeUVRenderTarget, col * size2, i > 2 ? size2 : 0, size2, size2);
+      const size = this._cubeSize;
+      _setViewport(cubeUVRenderTarget, col * size, i > 2 ? size : 0, size, size);
       renderer.setRenderTarget(cubeUVRenderTarget);
       if (useSolidColor) {
         renderer.render(backgroundBox, cubeCamera);
@@ -10378,8 +10379,8 @@ class PMREMGenerator {
     const mesh = new Mesh(this._lodPlanes[0], material);
     const uniforms = material.uniforms;
     uniforms["envMap"].value = texture;
-    const size2 = this._cubeSize;
-    _setViewport(cubeUVRenderTarget, 0, 0, 3 * size2, 2 * size2);
+    const size = this._cubeSize;
+    _setViewport(cubeUVRenderTarget, 0, 0, 3 * size, 2 * size);
     renderer.setRenderTarget(cubeUVRenderTarget);
     renderer.render(mesh, _flatCamera);
   }
@@ -11162,29 +11163,29 @@ function WebGLMorphtargets(gl, capabilities, textures) {
           const morphTarget = morphTargets[i];
           const morphNormal = morphNormals[i];
           const morphColor = morphColors[i];
-          const offset2 = width * height * 4 * i;
+          const offset = width * height * 4 * i;
           for (let j = 0; j < morphTarget.count; j++) {
             const stride = j * vertexDataStride;
             if (hasMorphPosition === true) {
               morph.fromBufferAttribute(morphTarget, j);
-              buffer[offset2 + stride + 0] = morph.x;
-              buffer[offset2 + stride + 1] = morph.y;
-              buffer[offset2 + stride + 2] = morph.z;
-              buffer[offset2 + stride + 3] = 0;
+              buffer[offset + stride + 0] = morph.x;
+              buffer[offset + stride + 1] = morph.y;
+              buffer[offset + stride + 2] = morph.z;
+              buffer[offset + stride + 3] = 0;
             }
             if (hasMorphNormals === true) {
               morph.fromBufferAttribute(morphNormal, j);
-              buffer[offset2 + stride + 4] = morph.x;
-              buffer[offset2 + stride + 5] = morph.y;
-              buffer[offset2 + stride + 6] = morph.z;
-              buffer[offset2 + stride + 7] = 0;
+              buffer[offset + stride + 4] = morph.x;
+              buffer[offset + stride + 5] = morph.y;
+              buffer[offset + stride + 6] = morph.z;
+              buffer[offset + stride + 7] = 0;
             }
             if (hasMorphColors === true) {
               morph.fromBufferAttribute(morphColor, j);
-              buffer[offset2 + stride + 8] = morph.x;
-              buffer[offset2 + stride + 9] = morph.y;
-              buffer[offset2 + stride + 10] = morph.z;
-              buffer[offset2 + stride + 11] = morphColor.itemSize === 4 ? morph.w : 1;
+              buffer[offset + stride + 8] = morph.x;
+              buffer[offset + stride + 9] = morph.y;
+              buffer[offset + stride + 10] = morph.z;
+              buffer[offset + stride + 11] = morphColor.itemSize === 4 ? morph.w : 1;
             }
           }
         }
@@ -11366,9 +11367,9 @@ function flatten(array, nBlocks, blockSize) {
   }
   if (nBlocks !== 0) {
     firstElem.toArray(r, 0);
-    for (let i = 1, offset2 = 0; i !== nBlocks; ++i) {
-      offset2 += blockSize;
-      array[i].toArray(r, offset2);
+    for (let i = 1, offset = 0; i !== nBlocks; ++i) {
+      offset += blockSize;
+      array[i].toArray(r, offset);
     }
   }
   return r;
@@ -13138,8 +13139,8 @@ function WebGLProperties() {
   function remove(object) {
     properties.delete(object);
   }
-  function update2(object, key2, value) {
-    properties.get(object)[key2] = value;
+  function update2(object, key, value) {
+    properties.get(object)[key] = value;
   }
   function dispose() {
     properties = /* @__PURE__ */ new WeakMap();
@@ -17023,10 +17024,10 @@ function WebGLUniformsGroups(gl, info, capabilities, state) {
     const bindingPointIndex = allocateBindingPointIndex();
     uniformsGroup.__bindingPointIndex = bindingPointIndex;
     const buffer = gl.createBuffer();
-    const size2 = uniformsGroup.__size;
+    const size = uniformsGroup.__size;
     const usage = uniformsGroup.usage;
     gl.bindBuffer(gl.UNIFORM_BUFFER, buffer);
-    gl.bufferData(gl.UNIFORM_BUFFER, size2, usage);
+    gl.bufferData(gl.UNIFORM_BUFFER, size, usage);
     gl.bindBuffer(gl.UNIFORM_BUFFER, null);
     gl.bindBufferBase(gl.UNIFORM_BUFFER, bindingPointIndex, buffer);
     return buffer;
@@ -17049,7 +17050,7 @@ function WebGLUniformsGroups(gl, info, capabilities, state) {
     for (let i = 0, il = uniforms.length; i < il; i++) {
       const uniform = uniforms[i];
       if (hasUniformChanged(uniform, i, cache) === true) {
-        const offset2 = uniform.__offset;
+        const offset = uniform.__offset;
         const values = Array.isArray(uniform.value) ? uniform.value : [uniform.value];
         let arrayOffset = 0;
         for (let i2 = 0; i2 < values.length; i2++) {
@@ -17057,7 +17058,7 @@ function WebGLUniformsGroups(gl, info, capabilities, state) {
           const info2 = getUniformSize(value);
           if (typeof value === "number") {
             uniform.__data[0] = value;
-            gl.bufferSubData(gl.UNIFORM_BUFFER, offset2 + arrayOffset, uniform.__data);
+            gl.bufferSubData(gl.UNIFORM_BUFFER, offset + arrayOffset, uniform.__data);
           } else if (value.isMatrix3) {
             uniform.__data[0] = value.elements[0];
             uniform.__data[1] = value.elements[1];
@@ -17076,7 +17077,7 @@ function WebGLUniformsGroups(gl, info, capabilities, state) {
             arrayOffset += info2.storage / Float32Array.BYTES_PER_ELEMENT;
           }
         }
-        gl.bufferSubData(gl.UNIFORM_BUFFER, offset2, uniform.__data);
+        gl.bufferSubData(gl.UNIFORM_BUFFER, offset, uniform.__data);
       }
     }
     gl.bindBuffer(gl.UNIFORM_BUFFER, null);
@@ -17117,7 +17118,7 @@ function WebGLUniformsGroups(gl, info, capabilities, state) {
   }
   function prepareUniformsGroup(uniformsGroup) {
     const uniforms = uniformsGroup.uniforms;
-    let offset2 = 0;
+    let offset = 0;
     const chunkSize = 16;
     let chunkOffset = 0;
     for (let i = 0, l = uniforms.length; i < l; i++) {
@@ -17136,21 +17137,21 @@ function WebGLUniformsGroups(gl, info, capabilities, state) {
         infos.storage += info2.storage;
       }
       uniform.__data = new Float32Array(infos.storage / Float32Array.BYTES_PER_ELEMENT);
-      uniform.__offset = offset2;
+      uniform.__offset = offset;
       if (i > 0) {
-        chunkOffset = offset2 % chunkSize;
+        chunkOffset = offset % chunkSize;
         const remainingSizeInChunk = chunkSize - chunkOffset;
         if (chunkOffset !== 0 && remainingSizeInChunk - infos.boundary < 0) {
-          offset2 += chunkSize - chunkOffset;
-          uniform.__offset = offset2;
+          offset += chunkSize - chunkOffset;
+          uniform.__offset = offset;
         }
       }
-      offset2 += infos.storage;
+      offset += infos.storage;
     }
-    chunkOffset = offset2 % chunkSize;
+    chunkOffset = offset % chunkSize;
     if (chunkOffset > 0)
-      offset2 += chunkSize - chunkOffset;
-    uniformsGroup.__size = offset2;
+      offset += chunkSize - chunkOffset;
+    uniformsGroup.__size = offset;
     uniformsGroup.__cache = {};
     return this;
   }
@@ -18718,8 +18719,8 @@ class InterleavedBuffer {
     }
     return this;
   }
-  set(value, offset2 = 0) {
-    this.array.set(value, offset2);
+  set(value, offset = 0) {
+    this.array.set(value, offset);
     return this;
   }
   clone(data) {
@@ -18761,12 +18762,12 @@ class InterleavedBuffer {
 }
 const _vector$6 = /* @__PURE__ */ new Vector3();
 class InterleavedBufferAttribute {
-  constructor(interleavedBuffer, itemSize, offset2, normalized = false) {
+  constructor(interleavedBuffer, itemSize, offset, normalized = false) {
     this.isInterleavedBufferAttribute = true;
     this.name = "";
     this.data = interleavedBuffer;
     this.itemSize = itemSize;
-    this.offset = offset2;
+    this.offset = offset;
     this.normalized = normalized;
   }
   get count() {
@@ -19424,12 +19425,12 @@ class Skeleton {
     return new Skeleton(this.bones, this.boneInverses);
   }
   computeBoneTexture() {
-    let size2 = Math.sqrt(this.bones.length * 4);
-    size2 = Math.ceil(size2 / 4) * 4;
-    size2 = Math.max(size2, 4);
-    const boneMatrices = new Float32Array(size2 * size2 * 4);
+    let size = Math.sqrt(this.bones.length * 4);
+    size = Math.ceil(size / 4) * 4;
+    size = Math.max(size, 4);
+    const boneMatrices = new Float32Array(size * size * 4);
     boneMatrices.set(this.boneMatrices);
-    const boneTexture = new DataTexture(boneMatrices, size2, size2, RGBAFormat, FloatType);
+    const boneTexture = new DataTexture(boneMatrices, size, size, RGBAFormat, FloatType);
     boneTexture.needsUpdate = true;
     this.boneMatrices = boneMatrices;
     this.boneTexture = boneTexture;
@@ -19707,11 +19708,11 @@ class BatchedMesh extends Mesh {
     this._initMatricesTexture();
   }
   _initMatricesTexture() {
-    let size2 = Math.sqrt(this._maxGeometryCount * 4);
-    size2 = Math.ceil(size2 / 4) * 4;
-    size2 = Math.max(size2, 4);
-    const matricesArray = new Float32Array(size2 * size2 * 4);
-    const matricesTexture = new DataTexture(matricesArray, size2, size2, RGBAFormat, FloatType);
+    let size = Math.sqrt(this._maxGeometryCount * 4);
+    size = Math.ceil(size / 4) * 4;
+    size = Math.max(size, 4);
+    const matricesArray = new Float32Array(size * size * 4);
+    const matricesTexture = new DataTexture(matricesArray, size, size, RGBAFormat, FloatType);
     this._matricesTexture = matricesTexture;
   }
   _initializeGeometry(reference) {
@@ -21687,14 +21688,14 @@ class LatheGeometry extends BufferGeometry {
   }
 }
 class CapsuleGeometry extends LatheGeometry {
-  constructor(radius2 = 1, length = 1, capSegments = 4, radialSegments = 8) {
+  constructor(radius = 1, length = 1, capSegments = 4, radialSegments = 8) {
     const path = new Path();
-    path.absarc(0, -length / 2, radius2, Math.PI * 1.5, 0);
-    path.absarc(0, length / 2, radius2, 0, Math.PI * 0.5);
+    path.absarc(0, -length / 2, radius, Math.PI * 1.5, 0);
+    path.absarc(0, length / 2, radius, 0, Math.PI * 0.5);
     super(path.getPoints(capSegments), radialSegments);
     this.type = "CapsuleGeometry";
     this.parameters = {
-      radius: radius2,
+      radius,
       length,
       capSegments,
       radialSegments
@@ -21705,11 +21706,11 @@ class CapsuleGeometry extends LatheGeometry {
   }
 }
 class CircleGeometry extends BufferGeometry {
-  constructor(radius2 = 1, segments = 32, thetaStart = 0, thetaLength = Math.PI * 2) {
+  constructor(radius = 1, segments = 32, thetaStart = 0, thetaLength = Math.PI * 2) {
     super();
     this.type = "CircleGeometry";
     this.parameters = {
-      radius: radius2,
+      radius,
       segments,
       thetaStart,
       thetaLength
@@ -21726,12 +21727,12 @@ class CircleGeometry extends BufferGeometry {
     uvs.push(0.5, 0.5);
     for (let s = 0, i = 3; s <= segments; s++, i += 3) {
       const segment = thetaStart + s / segments * thetaLength;
-      vertex2.x = radius2 * Math.cos(segment);
-      vertex2.y = radius2 * Math.sin(segment);
+      vertex2.x = radius * Math.cos(segment);
+      vertex2.y = radius * Math.sin(segment);
       vertices.push(vertex2.x, vertex2.y, vertex2.z);
       normals.push(0, 0, 1);
-      uv.x = (vertices[i] / radius2 + 1) / 2;
-      uv.y = (vertices[i + 1] / radius2 + 1) / 2;
+      uv.x = (vertices[i] / radius + 1) / 2;
+      uv.y = (vertices[i + 1] / radius + 1) / 2;
       uvs.push(uv.x, uv.y);
     }
     for (let i = 1; i <= segments; i++) {
@@ -21795,15 +21796,15 @@ class CylinderGeometry extends BufferGeometry {
       for (let y = 0; y <= heightSegments; y++) {
         const indexRow = [];
         const v = y / heightSegments;
-        const radius2 = v * (radiusBottom - radiusTop) + radiusTop;
+        const radius = v * (radiusBottom - radiusTop) + radiusTop;
         for (let x = 0; x <= radialSegments; x++) {
           const u = x / radialSegments;
           const theta = u * thetaLength + thetaStart;
           const sinTheta = Math.sin(theta);
           const cosTheta = Math.cos(theta);
-          vertex2.x = radius2 * sinTheta;
+          vertex2.x = radius * sinTheta;
           vertex2.y = -v * height + halfHeight;
-          vertex2.z = radius2 * cosTheta;
+          vertex2.z = radius * cosTheta;
           vertices.push(vertex2.x, vertex2.y, vertex2.z);
           normal.set(sinTheta, slope, cosTheta).normalize();
           normals.push(normal.x, normal.y, normal.z);
@@ -21831,7 +21832,7 @@ class CylinderGeometry extends BufferGeometry {
       const uv = new Vector2();
       const vertex2 = new Vector3();
       let groupCount = 0;
-      const radius2 = top === true ? radiusTop : radiusBottom;
+      const radius = top === true ? radiusTop : radiusBottom;
       const sign2 = top === true ? 1 : -1;
       for (let x = 1; x <= radialSegments; x++) {
         vertices.push(0, halfHeight * sign2, 0);
@@ -21845,9 +21846,9 @@ class CylinderGeometry extends BufferGeometry {
         const theta = u * thetaLength + thetaStart;
         const cosTheta = Math.cos(theta);
         const sinTheta = Math.sin(theta);
-        vertex2.x = radius2 * sinTheta;
+        vertex2.x = radius * sinTheta;
         vertex2.y = halfHeight * sign2;
-        vertex2.z = radius2 * cosTheta;
+        vertex2.z = radius * cosTheta;
         vertices.push(vertex2.x, vertex2.y, vertex2.z);
         normals.push(0, sign2, 0);
         uv.x = cosTheta * 0.5 + 0.5;
@@ -21879,11 +21880,11 @@ class CylinderGeometry extends BufferGeometry {
   }
 }
 class ConeGeometry extends CylinderGeometry {
-  constructor(radius2 = 1, height = 1, radialSegments = 32, heightSegments = 1, openEnded = false, thetaStart = 0, thetaLength = Math.PI * 2) {
-    super(0, radius2, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength);
+  constructor(radius = 1, height = 1, radialSegments = 32, heightSegments = 1, openEnded = false, thetaStart = 0, thetaLength = Math.PI * 2) {
+    super(0, radius, height, radialSegments, heightSegments, openEnded, thetaStart, thetaLength);
     this.type = "ConeGeometry";
     this.parameters = {
-      radius: radius2,
+      radius,
       height,
       radialSegments,
       heightSegments,
@@ -21897,19 +21898,19 @@ class ConeGeometry extends CylinderGeometry {
   }
 }
 class PolyhedronGeometry extends BufferGeometry {
-  constructor(vertices = [], indices = [], radius2 = 1, detail = 0) {
+  constructor(vertices = [], indices = [], radius = 1, detail = 0) {
     super();
     this.type = "PolyhedronGeometry";
     this.parameters = {
       vertices,
       indices,
-      radius: radius2,
+      radius,
       detail
     };
     const vertexBuffer = [];
     const uvBuffer = [];
     subdivide(detail);
-    applyRadius(radius2);
+    applyRadius(radius);
     generateUVs();
     this.setAttribute("position", new Float32BufferAttribute(vertexBuffer, 3));
     this.setAttribute("normal", new Float32BufferAttribute(vertexBuffer.slice(), 3));
@@ -21961,13 +21962,13 @@ class PolyhedronGeometry extends BufferGeometry {
         }
       }
     }
-    function applyRadius(radius3) {
+    function applyRadius(radius2) {
       const vertex2 = new Vector3();
       for (let i = 0; i < vertexBuffer.length; i += 3) {
         vertex2.x = vertexBuffer[i + 0];
         vertex2.y = vertexBuffer[i + 1];
         vertex2.z = vertexBuffer[i + 2];
-        vertex2.normalize().multiplyScalar(radius3);
+        vertex2.normalize().multiplyScalar(radius2);
         vertexBuffer[i + 0] = vertex2.x;
         vertexBuffer[i + 1] = vertex2.y;
         vertexBuffer[i + 2] = vertex2.z;
@@ -22059,7 +22060,7 @@ class PolyhedronGeometry extends BufferGeometry {
   }
 }
 class DodecahedronGeometry extends PolyhedronGeometry {
-  constructor(radius2 = 1, detail = 0) {
+  constructor(radius = 1, detail = 0) {
     const t = (1 + Math.sqrt(5)) / 2;
     const r = 1 / t;
     const vertices = [
@@ -22238,10 +22239,10 @@ class DodecahedronGeometry extends PolyhedronGeometry {
       5,
       9
     ];
-    super(vertices, indices, radius2, detail);
+    super(vertices, indices, radius, detail);
     this.type = "DodecahedronGeometry";
     this.parameters = {
-      radius: radius2,
+      radius,
       detail
     };
   }
@@ -22317,9 +22318,9 @@ class EdgesGeometry extends BufferGeometry {
           }
         }
       }
-      for (const key2 in edgeData) {
-        if (edgeData[key2]) {
-          const { index0, index1 } = edgeData[key2];
+      for (const key in edgeData) {
+        if (edgeData[key]) {
+          const { index0, index1 } = edgeData[key];
           _v0.fromBufferAttribute(positionAttr, index0);
           _v1$1.fromBufferAttribute(positionAttr, index1);
           vertices.push(_v0.x, _v0.y, _v0.z);
@@ -22640,7 +22641,7 @@ function indexCurve(start, minX, minY, invSize) {
   sortLinked(p);
 }
 function sortLinked(list) {
-  let i, p, q2, e2, tail, numMerges, pSize, qSize, inSize = 1;
+  let i, p, q, e, tail, numMerges, pSize, qSize, inSize = 1;
   do {
     p = list;
     list = null;
@@ -22648,33 +22649,33 @@ function sortLinked(list) {
     numMerges = 0;
     while (p) {
       numMerges++;
-      q2 = p;
+      q = p;
       pSize = 0;
       for (i = 0; i < inSize; i++) {
         pSize++;
-        q2 = q2.nextZ;
-        if (!q2)
+        q = q.nextZ;
+        if (!q)
           break;
       }
       qSize = inSize;
-      while (pSize > 0 || qSize > 0 && q2) {
-        if (pSize !== 0 && (qSize === 0 || !q2 || p.z <= q2.z)) {
-          e2 = p;
+      while (pSize > 0 || qSize > 0 && q) {
+        if (pSize !== 0 && (qSize === 0 || !q || p.z <= q.z)) {
+          e = p;
           p = p.nextZ;
           pSize--;
         } else {
-          e2 = q2;
-          q2 = q2.nextZ;
+          e = q;
+          q = q.nextZ;
           qSize--;
         }
         if (tail)
-          tail.nextZ = e2;
+          tail.nextZ = e;
         else
-          list = e2;
-        e2.prevZ = tail;
-        tail = e2;
+          list = e;
+        e.prevZ = tail;
+        tail = e;
       }
-      p = q2;
+      p = q;
     }
     tail.nextZ = null;
     inSize *= 2;
@@ -22712,8 +22713,8 @@ function isValidDiagonal(a, b) {
   (area(a.prev, a, b.prev) || area(a, b.prev, b)) || // does not create opposite-facing sectors
   equals(a, b) && area(a.prev, a, a.next) > 0 && area(b.prev, b, b.next) > 0);
 }
-function area(p, q2, r) {
-  return (q2.y - p.y) * (r.x - q2.x) - (q2.x - p.x) * (r.y - q2.y);
+function area(p, q, r) {
+  return (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y);
 }
 function equals(p1, p2) {
   return p1.x === p2.x && p1.y === p2.y;
@@ -22735,8 +22736,8 @@ function intersects(p1, q1, p2, q2) {
     return true;
   return false;
 }
-function onSegment(p, q2, r) {
-  return q2.x <= Math.max(p.x, r.x) && q2.x >= Math.min(p.x, r.x) && q2.y <= Math.max(p.y, r.y) && q2.y >= Math.min(p.y, r.y);
+function onSegment(p, q, r) {
+  return q.x <= Math.max(p.x, r.x) && q.x >= Math.min(p.x, r.x) && q.y <= Math.max(p.y, r.y) && q.y >= Math.min(p.y, r.y);
 }
 function sign(num) {
   return num > 0 ? 1 : num < 0 ? -1 : 0;
@@ -22820,8 +22821,8 @@ class ShapeUtils {
   static area(contour) {
     const n = contour.length;
     let a = 0;
-    for (let p = n - 1, q2 = 0; q2 < n; p = q2++) {
-      a += contour[p].x * contour[q2].y - contour[q2].x * contour[p].y;
+    for (let p = n - 1, q = 0; q < n; p = q++) {
+      a += contour[p].x * contour[q].y - contour[q].x * contour[p].y;
     }
     return a * 0.5;
   }
@@ -22927,10 +22928,10 @@ class ExtrudeGeometry extends BufferGeometry {
         const ahole = holes[h];
         vertices = vertices.concat(ahole);
       }
-      function scalePt2(pt, vec, size2) {
+      function scalePt2(pt, vec, size) {
         if (!vec)
           console.error("THREE.ExtrudeGeometry: vec does not exist");
-        return pt.clone().addScaledVector(vec, size2);
+        return pt.clone().addScaledVector(vec, size);
       }
       const vlen = vertices.length, flen = faces.length;
       function getBevelVec(inPt, inPrev, inNext) {
@@ -23076,16 +23077,16 @@ class ExtrudeGeometry extends BufferGeometry {
         const start = verticesArray.length / 3;
         if (bevelEnabled) {
           let layer = 0;
-          let offset2 = vlen * layer;
+          let offset = vlen * layer;
           for (let i = 0; i < flen; i++) {
             const face = faces[i];
-            f3(face[2] + offset2, face[1] + offset2, face[0] + offset2);
+            f3(face[2] + offset, face[1] + offset, face[0] + offset);
           }
           layer = steps + bevelSegments * 2;
-          offset2 = vlen * layer;
+          offset = vlen * layer;
           for (let i = 0; i < flen; i++) {
             const face = faces[i];
-            f3(face[0] + offset2, face[1] + offset2, face[2] + offset2);
+            f3(face[0] + offset, face[1] + offset, face[2] + offset);
           }
         } else {
           for (let i = 0; i < flen; i++) {
@@ -23252,7 +23253,7 @@ function toJSON$1(shapes, options, data) {
   return data;
 }
 class IcosahedronGeometry extends PolyhedronGeometry {
-  constructor(radius2 = 1, detail = 0) {
+  constructor(radius = 1, detail = 0) {
     const t = (1 + Math.sqrt(5)) / 2;
     const vertices = [
       -1,
@@ -23354,10 +23355,10 @@ class IcosahedronGeometry extends PolyhedronGeometry {
       8,
       1
     ];
-    super(vertices, indices, radius2, detail);
+    super(vertices, indices, radius, detail);
     this.type = "IcosahedronGeometry";
     this.parameters = {
-      radius: radius2,
+      radius,
       detail
     };
   }
@@ -23366,7 +23367,7 @@ class IcosahedronGeometry extends PolyhedronGeometry {
   }
 }
 class OctahedronGeometry extends PolyhedronGeometry {
-  constructor(radius2 = 1, detail = 0) {
+  constructor(radius = 1, detail = 0) {
     const vertices = [
       1,
       0,
@@ -23413,10 +23414,10 @@ class OctahedronGeometry extends PolyhedronGeometry {
       4,
       2
     ];
-    super(vertices, indices, radius2, detail);
+    super(vertices, indices, radius, detail);
     this.type = "OctahedronGeometry";
     this.parameters = {
-      radius: radius2,
+      radius,
       detail
     };
   }
@@ -23442,22 +23443,22 @@ class RingGeometry extends BufferGeometry {
     const vertices = [];
     const normals = [];
     const uvs = [];
-    let radius2 = innerRadius;
+    let radius = innerRadius;
     const radiusStep = (outerRadius - innerRadius) / phiSegments;
     const vertex2 = new Vector3();
     const uv = new Vector2();
     for (let j = 0; j <= phiSegments; j++) {
       for (let i = 0; i <= thetaSegments; i++) {
         const segment = thetaStart + i / thetaSegments * thetaLength;
-        vertex2.x = radius2 * Math.cos(segment);
-        vertex2.y = radius2 * Math.sin(segment);
+        vertex2.x = radius * Math.cos(segment);
+        vertex2.y = radius * Math.sin(segment);
         vertices.push(vertex2.x, vertex2.y, vertex2.z);
         normals.push(0, 0, 1);
         uv.x = (vertex2.x / outerRadius + 1) / 2;
         uv.y = (vertex2.y / outerRadius + 1) / 2;
         uvs.push(uv.x, uv.y);
       }
-      radius2 += radiusStep;
+      radius += radiusStep;
     }
     for (let j = 0; j < phiSegments; j++) {
       const thetaSegmentLevel = j * (thetaSegments + 1);
@@ -23580,11 +23581,11 @@ function toJSON(shapes, data) {
   return data;
 }
 class SphereGeometry extends BufferGeometry {
-  constructor(radius2 = 1, widthSegments = 32, heightSegments = 16, phiStart = 0, phiLength = Math.PI * 2, thetaStart = 0, thetaLength = Math.PI) {
+  constructor(radius = 1, widthSegments = 32, heightSegments = 16, phiStart = 0, phiLength = Math.PI * 2, thetaStart = 0, thetaLength = Math.PI) {
     super();
     this.type = "SphereGeometry";
     this.parameters = {
-      radius: radius2,
+      radius,
       widthSegments,
       heightSegments,
       phiStart,
@@ -23614,9 +23615,9 @@ class SphereGeometry extends BufferGeometry {
       }
       for (let ix = 0; ix <= widthSegments; ix++) {
         const u = ix / widthSegments;
-        vertex2.x = -radius2 * Math.cos(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
-        vertex2.y = radius2 * Math.cos(thetaStart + v * thetaLength);
-        vertex2.z = radius2 * Math.sin(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
+        vertex2.x = -radius * Math.cos(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
+        vertex2.y = radius * Math.cos(thetaStart + v * thetaLength);
+        vertex2.z = radius * Math.sin(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
         vertices.push(vertex2.x, vertex2.y, vertex2.z);
         normal.copy(vertex2).normalize();
         normals.push(normal.x, normal.y, normal.z);
@@ -23652,7 +23653,7 @@ class SphereGeometry extends BufferGeometry {
   }
 }
 class TetrahedronGeometry extends PolyhedronGeometry {
-  constructor(radius2 = 1, detail = 0) {
+  constructor(radius = 1, detail = 0) {
     const vertices = [
       1,
       1,
@@ -23681,10 +23682,10 @@ class TetrahedronGeometry extends PolyhedronGeometry {
       3,
       1
     ];
-    super(vertices, indices, radius2, detail);
+    super(vertices, indices, radius, detail);
     this.type = "TetrahedronGeometry";
     this.parameters = {
-      radius: radius2,
+      radius,
       detail
     };
   }
@@ -23693,11 +23694,11 @@ class TetrahedronGeometry extends PolyhedronGeometry {
   }
 }
 class TorusGeometry extends BufferGeometry {
-  constructor(radius2 = 1, tube = 0.4, radialSegments = 12, tubularSegments = 48, arc = Math.PI * 2) {
+  constructor(radius = 1, tube = 0.4, radialSegments = 12, tubularSegments = 48, arc = Math.PI * 2) {
     super();
     this.type = "TorusGeometry";
     this.parameters = {
-      radius: radius2,
+      radius,
       tube,
       radialSegments,
       tubularSegments,
@@ -23716,12 +23717,12 @@ class TorusGeometry extends BufferGeometry {
       for (let i = 0; i <= tubularSegments; i++) {
         const u = i / tubularSegments * arc;
         const v = j / radialSegments * Math.PI * 2;
-        vertex2.x = (radius2 + tube * Math.cos(v)) * Math.cos(u);
-        vertex2.y = (radius2 + tube * Math.cos(v)) * Math.sin(u);
+        vertex2.x = (radius + tube * Math.cos(v)) * Math.cos(u);
+        vertex2.y = (radius + tube * Math.cos(v)) * Math.sin(u);
         vertex2.z = tube * Math.sin(v);
         vertices.push(vertex2.x, vertex2.y, vertex2.z);
-        center.x = radius2 * Math.cos(u);
-        center.y = radius2 * Math.sin(u);
+        center.x = radius * Math.cos(u);
+        center.y = radius * Math.sin(u);
         normal.subVectors(vertex2, center).normalize();
         normals.push(normal.x, normal.y, normal.z);
         uvs.push(i / tubularSegments);
@@ -23753,16 +23754,16 @@ class TorusGeometry extends BufferGeometry {
   }
 }
 class TorusKnotGeometry extends BufferGeometry {
-  constructor(radius2 = 1, tube = 0.4, tubularSegments = 64, radialSegments = 8, p = 2, q2 = 3) {
+  constructor(radius = 1, tube = 0.4, tubularSegments = 64, radialSegments = 8, p = 2, q = 3) {
     super();
     this.type = "TorusKnotGeometry";
     this.parameters = {
-      radius: radius2,
+      radius,
       tube,
       tubularSegments,
       radialSegments,
       p,
-      q: q2
+      q
     };
     tubularSegments = Math.floor(tubularSegments);
     radialSegments = Math.floor(radialSegments);
@@ -23779,8 +23780,8 @@ class TorusKnotGeometry extends BufferGeometry {
     const N = new Vector3();
     for (let i = 0; i <= tubularSegments; ++i) {
       const u = i / tubularSegments * p * Math.PI * 2;
-      calculatePositionOnCurve(u, p, q2, radius2, P1);
-      calculatePositionOnCurve(u + 0.01, p, q2, radius2, P2);
+      calculatePositionOnCurve(u, p, q, radius, P1);
+      calculatePositionOnCurve(u + 0.01, p, q, radius, P2);
       T2.subVectors(P2, P1);
       N.addVectors(P2, P1);
       B.crossVectors(T2, N);
@@ -23815,14 +23816,14 @@ class TorusKnotGeometry extends BufferGeometry {
     this.setAttribute("position", new Float32BufferAttribute(vertices, 3));
     this.setAttribute("normal", new Float32BufferAttribute(normals, 3));
     this.setAttribute("uv", new Float32BufferAttribute(uvs, 2));
-    function calculatePositionOnCurve(u, p2, q3, radius3, position) {
+    function calculatePositionOnCurve(u, p2, q2, radius2, position) {
       const cu = Math.cos(u);
       const su = Math.sin(u);
-      const quOverP = q3 / p2 * u;
+      const quOverP = q2 / p2 * u;
       const cs = Math.cos(quOverP);
-      position.x = radius3 * (2 + cs) * 0.5 * cu;
-      position.y = radius3 * (2 + cs) * su * 0.5;
-      position.z = radius3 * Math.sin(quOverP) * 0.5;
+      position.x = radius2 * (2 + cs) * 0.5 * cu;
+      position.y = radius2 * (2 + cs) * su * 0.5;
+      position.z = radius2 * Math.sin(quOverP) * 0.5;
     }
   }
   copy(source) {
@@ -23835,13 +23836,13 @@ class TorusKnotGeometry extends BufferGeometry {
   }
 }
 class TubeGeometry extends BufferGeometry {
-  constructor(path = new QuadraticBezierCurve3(new Vector3(-1, -1, 0), new Vector3(-1, 1, 0), new Vector3(1, 1, 0)), tubularSegments = 64, radius2 = 1, radialSegments = 8, closed = false) {
+  constructor(path = new QuadraticBezierCurve3(new Vector3(-1, -1, 0), new Vector3(-1, 1, 0), new Vector3(1, 1, 0)), tubularSegments = 64, radius = 1, radialSegments = 8, closed = false) {
     super();
     this.type = "TubeGeometry";
     this.parameters = {
       path,
       tubularSegments,
-      radius: radius2,
+      radius,
       radialSegments,
       closed
     };
@@ -23883,9 +23884,9 @@ class TubeGeometry extends BufferGeometry {
         normal.z = cos * N.z + sin * B.z;
         normal.normalize();
         normals.push(normal.x, normal.y, normal.z);
-        vertex2.x = P.x + radius2 * normal.x;
-        vertex2.y = P.y + radius2 * normal.y;
-        vertex2.z = P.z + radius2 * normal.z;
+        vertex2.x = P.x + radius * normal.x;
+        vertex2.y = P.y + radius * normal.y;
+        vertex2.z = P.z + radius * normal.z;
         vertices.push(vertex2.x, vertex2.y, vertex2.z);
       }
     }
@@ -24591,42 +24592,42 @@ function sortedArray(values, stride, order) {
   return result;
 }
 function flattenJSON(jsonKeys, times, values, valuePropertyName) {
-  let i = 1, key2 = jsonKeys[0];
-  while (key2 !== void 0 && key2[valuePropertyName] === void 0) {
-    key2 = jsonKeys[i++];
+  let i = 1, key = jsonKeys[0];
+  while (key !== void 0 && key[valuePropertyName] === void 0) {
+    key = jsonKeys[i++];
   }
-  if (key2 === void 0)
+  if (key === void 0)
     return;
-  let value = key2[valuePropertyName];
+  let value = key[valuePropertyName];
   if (value === void 0)
     return;
   if (Array.isArray(value)) {
     do {
-      value = key2[valuePropertyName];
+      value = key[valuePropertyName];
       if (value !== void 0) {
-        times.push(key2.time);
+        times.push(key.time);
         values.push.apply(values, value);
       }
-      key2 = jsonKeys[i++];
-    } while (key2 !== void 0);
+      key = jsonKeys[i++];
+    } while (key !== void 0);
   } else if (value.toArray !== void 0) {
     do {
-      value = key2[valuePropertyName];
+      value = key[valuePropertyName];
       if (value !== void 0) {
-        times.push(key2.time);
+        times.push(key.time);
         value.toArray(values, values.length);
       }
-      key2 = jsonKeys[i++];
-    } while (key2 !== void 0);
+      key = jsonKeys[i++];
+    } while (key !== void 0);
   } else {
     do {
-      value = key2[valuePropertyName];
+      value = key[valuePropertyName];
       if (value !== void 0) {
-        times.push(key2.time);
+        times.push(key.time);
         values.push(value);
       }
-      key2 = jsonKeys[i++];
-    } while (key2 !== void 0);
+      key = jsonKeys[i++];
+    } while (key !== void 0);
   }
 }
 function subclip(sourceClip, name, startFrame, endFrame, fps = 30) {
@@ -24836,9 +24837,9 @@ class Interpolant {
     return this.settings || this.DefaultSettings_;
   }
   copySampleValue_(index) {
-    const result = this.resultBuffer, values = this.sampleValues, stride = this.valueSize, offset2 = index * stride;
+    const result = this.resultBuffer, values = this.sampleValues, stride = this.valueSize, offset = index * stride;
     for (let i = 0; i !== stride; ++i) {
-      result[i] = values[offset2 + i];
+      result[i] = values[offset + i];
     }
     return result;
   }
@@ -25110,9 +25111,9 @@ class KeyframeTrack {
       const timeNext = times[i + 1];
       if (time !== timeNext && (i !== 1 || time !== times[0])) {
         if (!smoothInterpolation) {
-          const offset2 = i * stride, offsetP = offset2 - stride, offsetN = offset2 + stride;
+          const offset = i * stride, offsetP = offset - stride, offsetN = offset + stride;
           for (let j = 0; j !== stride; ++j) {
-            const value = values[offset2 + j];
+            const value = values[offset + j];
             if (value !== values[offsetP + j] || value !== values[offsetN + j]) {
               keep = true;
               break;
@@ -25180,9 +25181,9 @@ class QuaternionLinearInterpolant extends Interpolant {
   }
   interpolate_(i1, t0, t, t1) {
     const result = this.resultBuffer, values = this.sampleValues, stride = this.valueSize, alpha = (t - t0) / (t1 - t0);
-    let offset2 = i1 * stride;
-    for (let end = offset2 + stride; offset2 !== end; offset2 += 4) {
-      Quaternion.slerpFlat(result, 0, values, offset2 - stride, values, offset2, alpha);
+    let offset = i1 * stride;
+    for (let end = offset + stride; offset !== end; offset += 4) {
+      Quaternion.slerpFlat(result, 0, values, offset - stride, values, offset, alpha);
     }
     return result;
   }
@@ -25465,18 +25466,18 @@ function parseKeyframeTrack(json) {
 const Cache = {
   enabled: false,
   files: {},
-  add: function(key2, file) {
+  add: function(key, file) {
     if (this.enabled === false)
       return;
-    this.files[key2] = file;
+    this.files[key] = file;
   },
-  get: function(key2) {
+  get: function(key) {
     if (this.enabled === false)
       return;
-    return this.files[key2];
+    return this.files[key];
   },
-  remove: function(key2) {
-    delete this.files[key2];
+  remove: function(key) {
+    delete this.files[key];
   },
   clear: function() {
     this.files = {};
@@ -25758,11 +25759,11 @@ class AnimationLoader extends Loader {
     loader.load(url, function(text) {
       try {
         onLoad(scope.parse(JSON.parse(text)));
-      } catch (e2) {
+      } catch (e) {
         if (onError) {
-          onError(e2);
+          onError(e);
         } else {
-          console.error(e2);
+          console.error(e);
         }
         scope.manager.itemError(url);
       }
@@ -26468,17 +26469,17 @@ class SphericalHarmonics3 {
   clone() {
     return new this.constructor().copy(this);
   }
-  fromArray(array, offset2 = 0) {
+  fromArray(array, offset = 0) {
     const coefficients = this.coefficients;
     for (let i = 0; i < 9; i++) {
-      coefficients[i].fromArray(array, offset2 + i * 3);
+      coefficients[i].fromArray(array, offset + i * 3);
     }
     return this;
   }
-  toArray(array = [], offset2 = 0) {
+  toArray(array = [], offset = 0) {
     const coefficients = this.coefficients;
     for (let i = 0; i < 9; i++) {
-      coefficients[i].toArray(array, offset2 + i * 3);
+      coefficients[i].toArray(array, offset + i * 3);
     }
     return array;
   }
@@ -26533,11 +26534,11 @@ class MaterialLoader extends Loader {
     loader.load(url, function(text) {
       try {
         onLoad(scope.parse(JSON.parse(text)));
-      } catch (e2) {
+      } catch (e) {
         if (onError) {
-          onError(e2);
+          onError(e);
         } else {
-          console.error(e2);
+          console.error(e);
         }
         scope.manager.itemError(url);
       }
@@ -26745,8 +26746,8 @@ class MaterialLoader extends Loader {
     if (json.glslVersion !== void 0)
       material.glslVersion = json.glslVersion;
     if (json.extensions !== void 0) {
-      for (const key2 in json.extensions) {
-        material.extensions[key2] = json.extensions[key2];
+      for (const key in json.extensions) {
+        material.extensions[key] = json.extensions[key];
       }
     }
     if (json.lights !== void 0)
@@ -26879,7 +26880,7 @@ class LoaderUtils {
     }
     try {
       return decodeURIComponent(escape(s));
-    } catch (e2) {
+    } catch (e) {
       return s;
     }
   }
@@ -26936,11 +26937,11 @@ class BufferGeometryLoader extends Loader {
     loader.load(url, function(text) {
       try {
         onLoad(scope.parse(JSON.parse(text)));
-      } catch (e2) {
+      } catch (e) {
         if (onError) {
-          onError(e2);
+          onError(e);
         } else {
-          console.error(e2);
+          console.error(e);
         }
         scope.manager.itemError(url);
       }
@@ -26977,8 +26978,8 @@ class BufferGeometryLoader extends Loader {
       geometry.setIndex(new BufferAttribute(typedArray, 1));
     }
     const attributes = json.data.attributes;
-    for (const key2 in attributes) {
-      const attribute = attributes[key2];
+    for (const key in attributes) {
+      const attribute = attributes[key];
       let bufferAttribute;
       if (attribute.isInterleavedBufferAttribute) {
         const interleavedBuffer = getInterleavedBuffer(json.data, attribute.data);
@@ -26992,12 +26993,12 @@ class BufferGeometryLoader extends Loader {
         bufferAttribute.name = attribute.name;
       if (attribute.usage !== void 0)
         bufferAttribute.setUsage(attribute.usage);
-      geometry.setAttribute(key2, bufferAttribute);
+      geometry.setAttribute(key, bufferAttribute);
     }
     const morphAttributes = json.data.morphAttributes;
     if (morphAttributes) {
-      for (const key2 in morphAttributes) {
-        const attributeArray = morphAttributes[key2];
+      for (const key in morphAttributes) {
+        const attributeArray = morphAttributes[key];
         const array = [];
         for (let i = 0, il = attributeArray.length; i < il; i++) {
           const attribute = attributeArray[i];
@@ -27013,7 +27014,7 @@ class BufferGeometryLoader extends Loader {
             bufferAttribute.name = attribute.name;
           array.push(bufferAttribute);
         }
-        geometry.morphAttributes[key2] = array;
+        geometry.morphAttributes[key] = array;
       }
     }
     const morphTargetsRelative = json.data.morphTargetsRelative;
@@ -27748,9 +27749,9 @@ class ImageBitmapLoader extends Loader {
       if (onLoad)
         onLoad(imageBitmap);
       scope.manager.itemEnd(url);
-    }).catch(function(e2) {
+    }).catch(function(e) {
       if (onError)
-        onError(e2);
+        onError(e);
       scope.manager.itemError(url);
       scope.manager.itemEnd(url);
     });
@@ -27787,15 +27788,15 @@ class AudioLoader extends Loader {
         context.decodeAudioData(bufferCopy, function(audioBuffer) {
           onLoad(audioBuffer);
         }).catch(handleError);
-      } catch (e2) {
-        handleError(e2);
+      } catch (e) {
+        handleError(e);
       }
     }, onProgress, onError);
-    function handleError(e2) {
+    function handleError(e) {
       if (onError) {
-        onError(e2);
+        onError(e);
       } else {
-        console.error(e2);
+        console.error(e);
       }
       scope.manager.itemError(url);
     }
@@ -28329,50 +28330,50 @@ class PropertyMixer {
   }
   // accumulate data in the 'incoming' region into 'accu<i>'
   accumulate(accuIndex, weight) {
-    const buffer = this.buffer, stride = this.valueSize, offset2 = accuIndex * stride + stride;
+    const buffer = this.buffer, stride = this.valueSize, offset = accuIndex * stride + stride;
     let currentWeight = this.cumulativeWeight;
     if (currentWeight === 0) {
       for (let i = 0; i !== stride; ++i) {
-        buffer[offset2 + i] = buffer[i];
+        buffer[offset + i] = buffer[i];
       }
       currentWeight = weight;
     } else {
       currentWeight += weight;
       const mix = weight / currentWeight;
-      this._mixBufferRegion(buffer, offset2, 0, mix, stride);
+      this._mixBufferRegion(buffer, offset, 0, mix, stride);
     }
     this.cumulativeWeight = currentWeight;
   }
   // accumulate data in the 'incoming' region into 'add'
   accumulateAdditive(weight) {
-    const buffer = this.buffer, stride = this.valueSize, offset2 = stride * this._addIndex;
+    const buffer = this.buffer, stride = this.valueSize, offset = stride * this._addIndex;
     if (this.cumulativeWeightAdditive === 0) {
       this._setIdentity();
     }
-    this._mixBufferRegionAdditive(buffer, offset2, 0, weight, stride);
+    this._mixBufferRegionAdditive(buffer, offset, 0, weight, stride);
     this.cumulativeWeightAdditive += weight;
   }
   // apply the state of 'accu<i>' to the binding when accus differ
   apply(accuIndex) {
-    const stride = this.valueSize, buffer = this.buffer, offset2 = accuIndex * stride + stride, weight = this.cumulativeWeight, weightAdditive = this.cumulativeWeightAdditive, binding = this.binding;
+    const stride = this.valueSize, buffer = this.buffer, offset = accuIndex * stride + stride, weight = this.cumulativeWeight, weightAdditive = this.cumulativeWeightAdditive, binding = this.binding;
     this.cumulativeWeight = 0;
     this.cumulativeWeightAdditive = 0;
     if (weight < 1) {
       const originalValueOffset = stride * this._origIndex;
       this._mixBufferRegion(
         buffer,
-        offset2,
+        offset,
         originalValueOffset,
         1 - weight,
         stride
       );
     }
     if (weightAdditive > 0) {
-      this._mixBufferRegionAdditive(buffer, offset2, this._addIndex * stride, 1, stride);
+      this._mixBufferRegionAdditive(buffer, offset, this._addIndex * stride, 1, stride);
     }
-    for (let i = stride, e2 = stride + stride; i !== e2; ++i) {
+    for (let i = stride, e = stride + stride; i !== e; ++i) {
       if (buffer[i] !== buffer[i + stride]) {
-        binding.setValue(buffer, offset2);
+        binding.setValue(buffer, offset);
         break;
       }
     }
@@ -28382,7 +28383,7 @@ class PropertyMixer {
     const binding = this.binding;
     const buffer = this.buffer, stride = this.valueSize, originalValueOffset = stride * this._origIndex;
     binding.getValue(buffer, originalValueOffset);
-    for (let i = stride, e2 = originalValueOffset; i !== e2; ++i) {
+    for (let i = stride, e = originalValueOffset; i !== e; ++i) {
       buffer[i] = buffer[originalValueOffset + i % stride];
     }
     this._setIdentity();
@@ -28460,16 +28461,16 @@ class Composite {
     this._targetGroup = targetGroup;
     this._bindings = targetGroup.subscribe_(path, parsedPath);
   }
-  getValue(array, offset2) {
+  getValue(array, offset) {
     this.bind();
     const firstValidIndex = this._targetGroup.nCachedObjects_, binding = this._bindings[firstValidIndex];
     if (binding !== void 0)
-      binding.getValue(array, offset2);
+      binding.getValue(array, offset);
   }
-  setValue(array, offset2) {
+  setValue(array, offset) {
     const bindings = this._bindings;
     for (let i = this._targetGroup.nCachedObjects_, n = bindings.length; i !== n; ++i) {
-      bindings[i].setValue(array, offset2);
+      bindings[i].setValue(array, offset);
     }
   }
   bind() {
@@ -28574,85 +28575,85 @@ class PropertyBinding {
   _setValue_unavailable() {
   }
   // Getters
-  _getValue_direct(buffer, offset2) {
-    buffer[offset2] = this.targetObject[this.propertyName];
+  _getValue_direct(buffer, offset) {
+    buffer[offset] = this.targetObject[this.propertyName];
   }
-  _getValue_array(buffer, offset2) {
+  _getValue_array(buffer, offset) {
     const source = this.resolvedProperty;
     for (let i = 0, n = source.length; i !== n; ++i) {
-      buffer[offset2++] = source[i];
+      buffer[offset++] = source[i];
     }
   }
-  _getValue_arrayElement(buffer, offset2) {
-    buffer[offset2] = this.resolvedProperty[this.propertyIndex];
+  _getValue_arrayElement(buffer, offset) {
+    buffer[offset] = this.resolvedProperty[this.propertyIndex];
   }
-  _getValue_toArray(buffer, offset2) {
-    this.resolvedProperty.toArray(buffer, offset2);
+  _getValue_toArray(buffer, offset) {
+    this.resolvedProperty.toArray(buffer, offset);
   }
   // Direct
-  _setValue_direct(buffer, offset2) {
-    this.targetObject[this.propertyName] = buffer[offset2];
+  _setValue_direct(buffer, offset) {
+    this.targetObject[this.propertyName] = buffer[offset];
   }
-  _setValue_direct_setNeedsUpdate(buffer, offset2) {
-    this.targetObject[this.propertyName] = buffer[offset2];
+  _setValue_direct_setNeedsUpdate(buffer, offset) {
+    this.targetObject[this.propertyName] = buffer[offset];
     this.targetObject.needsUpdate = true;
   }
-  _setValue_direct_setMatrixWorldNeedsUpdate(buffer, offset2) {
-    this.targetObject[this.propertyName] = buffer[offset2];
+  _setValue_direct_setMatrixWorldNeedsUpdate(buffer, offset) {
+    this.targetObject[this.propertyName] = buffer[offset];
     this.targetObject.matrixWorldNeedsUpdate = true;
   }
   // EntireArray
-  _setValue_array(buffer, offset2) {
+  _setValue_array(buffer, offset) {
     const dest = this.resolvedProperty;
     for (let i = 0, n = dest.length; i !== n; ++i) {
-      dest[i] = buffer[offset2++];
+      dest[i] = buffer[offset++];
     }
   }
-  _setValue_array_setNeedsUpdate(buffer, offset2) {
+  _setValue_array_setNeedsUpdate(buffer, offset) {
     const dest = this.resolvedProperty;
     for (let i = 0, n = dest.length; i !== n; ++i) {
-      dest[i] = buffer[offset2++];
+      dest[i] = buffer[offset++];
     }
     this.targetObject.needsUpdate = true;
   }
-  _setValue_array_setMatrixWorldNeedsUpdate(buffer, offset2) {
+  _setValue_array_setMatrixWorldNeedsUpdate(buffer, offset) {
     const dest = this.resolvedProperty;
     for (let i = 0, n = dest.length; i !== n; ++i) {
-      dest[i] = buffer[offset2++];
+      dest[i] = buffer[offset++];
     }
     this.targetObject.matrixWorldNeedsUpdate = true;
   }
   // ArrayElement
-  _setValue_arrayElement(buffer, offset2) {
-    this.resolvedProperty[this.propertyIndex] = buffer[offset2];
+  _setValue_arrayElement(buffer, offset) {
+    this.resolvedProperty[this.propertyIndex] = buffer[offset];
   }
-  _setValue_arrayElement_setNeedsUpdate(buffer, offset2) {
-    this.resolvedProperty[this.propertyIndex] = buffer[offset2];
+  _setValue_arrayElement_setNeedsUpdate(buffer, offset) {
+    this.resolvedProperty[this.propertyIndex] = buffer[offset];
     this.targetObject.needsUpdate = true;
   }
-  _setValue_arrayElement_setMatrixWorldNeedsUpdate(buffer, offset2) {
-    this.resolvedProperty[this.propertyIndex] = buffer[offset2];
+  _setValue_arrayElement_setMatrixWorldNeedsUpdate(buffer, offset) {
+    this.resolvedProperty[this.propertyIndex] = buffer[offset];
     this.targetObject.matrixWorldNeedsUpdate = true;
   }
   // HasToFromArray
-  _setValue_fromArray(buffer, offset2) {
-    this.resolvedProperty.fromArray(buffer, offset2);
+  _setValue_fromArray(buffer, offset) {
+    this.resolvedProperty.fromArray(buffer, offset);
   }
-  _setValue_fromArray_setNeedsUpdate(buffer, offset2) {
-    this.resolvedProperty.fromArray(buffer, offset2);
+  _setValue_fromArray_setNeedsUpdate(buffer, offset) {
+    this.resolvedProperty.fromArray(buffer, offset);
     this.targetObject.needsUpdate = true;
   }
-  _setValue_fromArray_setMatrixWorldNeedsUpdate(buffer, offset2) {
-    this.resolvedProperty.fromArray(buffer, offset2);
+  _setValue_fromArray_setMatrixWorldNeedsUpdate(buffer, offset) {
+    this.resolvedProperty.fromArray(buffer, offset);
     this.targetObject.matrixWorldNeedsUpdate = true;
   }
-  _getValue_unbound(targetArray, offset2) {
+  _getValue_unbound(targetArray, offset) {
     this.bind();
-    this.getValue(targetArray, offset2);
+    this.getValue(targetArray, offset);
   }
-  _setValue_unbound(sourceArray, offset2) {
+  _setValue_unbound(sourceArray, offset) {
     this.bind();
-    this.setValue(sourceArray, offset2);
+    this.setValue(sourceArray, offset);
   }
   // create getter / setter pair for a property in the scene graph
   bind() {
@@ -29873,14 +29874,14 @@ function intersectObject(object, raycaster, intersects2, recursive) {
   }
 }
 class Spherical {
-  constructor(radius2 = 1, phi = 0, theta = 0) {
-    this.radius = radius2;
+  constructor(radius = 1, phi = 0, theta = 0) {
+    this.radius = radius;
     this.phi = phi;
     this.theta = theta;
     return this;
   }
-  set(radius2, phi, theta) {
-    this.radius = radius2;
+  set(radius, phi, theta) {
+    this.radius = radius;
     this.phi = phi;
     this.theta = theta;
     return this;
@@ -29916,14 +29917,14 @@ class Spherical {
   }
 }
 class Cylindrical {
-  constructor(radius2 = 1, theta = 0, y = 0) {
-    this.radius = radius2;
+  constructor(radius = 1, theta = 0, y = 0) {
+    this.radius = radius;
     this.theta = theta;
     this.y = y;
     return this;
   }
-  set(radius2, theta, y) {
-    this.radius = radius2;
+  set(radius, theta, y) {
+    this.radius = radius;
     this.theta = theta;
     this.y = y;
     return this;
@@ -29966,8 +29967,8 @@ class Box2 {
     }
     return this;
   }
-  setFromCenterAndSize(center, size2) {
-    const halfSize = _vector$4.copy(size2).multiplyScalar(0.5);
+  setFromCenterAndSize(center, size) {
+    const halfSize = _vector$4.copy(size).multiplyScalar(0.5);
     this.min.copy(center).sub(halfSize);
     this.max.copy(center).add(halfSize);
     return this;
@@ -30042,9 +30043,9 @@ class Box2 {
     this.max.max(box.max);
     return this;
   }
-  translate(offset2) {
-    this.min.add(offset2);
-    this.max.add(offset2);
+  translate(offset) {
+    this.min.add(offset);
+    this.max.add(offset);
     return this;
   }
   equals(box) {
@@ -30284,14 +30285,14 @@ const _vector$1 = /* @__PURE__ */ new Vector3();
 const _color1 = /* @__PURE__ */ new Color();
 const _color2 = /* @__PURE__ */ new Color();
 class HemisphereLightHelper extends Object3D {
-  constructor(light, size2, color) {
+  constructor(light, size, color) {
     super();
     this.light = light;
     this.matrix = light.matrixWorld;
     this.matrixAutoUpdate = false;
     this.color = color;
     this.type = "HemisphereLightHelper";
-    const geometry = new OctahedronGeometry(size2);
+    const geometry = new OctahedronGeometry(size);
     geometry.rotateY(Math.PI * 0.5);
     this.material = new MeshBasicMaterial({ wireframe: true, fog: false, toneMapped: false });
     if (this.color === void 0)
@@ -30325,12 +30326,12 @@ class HemisphereLightHelper extends Object3D {
   }
 }
 class GridHelper extends LineSegments {
-  constructor(size2 = 10, divisions = 10, color1 = 4473924, color2 = 8947848) {
+  constructor(size = 10, divisions = 10, color1 = 4473924, color2 = 8947848) {
     color1 = new Color(color1);
     color2 = new Color(color2);
     const center = divisions / 2;
-    const step = size2 / divisions;
-    const halfSize = size2 / 2;
+    const step = size / divisions;
+    const halfSize = size / 2;
     const vertices = [], colors = [];
     for (let i = 0, j = 0, k = -halfSize; i <= divisions; i++, k += step) {
       vertices.push(-halfSize, 0, k, halfSize, 0, k);
@@ -30358,7 +30359,7 @@ class GridHelper extends LineSegments {
   }
 }
 class PolarGridHelper extends LineSegments {
-  constructor(radius2 = 10, sectors = 16, rings = 8, divisions = 64, color1 = 4473924, color2 = 8947848) {
+  constructor(radius = 10, sectors = 16, rings = 8, divisions = 64, color1 = 4473924, color2 = 8947848) {
     color1 = new Color(color1);
     color2 = new Color(color2);
     const vertices = [];
@@ -30366,8 +30367,8 @@ class PolarGridHelper extends LineSegments {
     if (sectors > 1) {
       for (let i = 0; i < sectors; i++) {
         const v = i / sectors * (Math.PI * 2);
-        const x = Math.sin(v) * radius2;
-        const z = Math.cos(v) * radius2;
+        const x = Math.sin(v) * radius;
+        const z = Math.cos(v) * radius;
         vertices.push(0, 0, 0);
         vertices.push(x, 0, z);
         const color = i & 1 ? color1 : color2;
@@ -30377,7 +30378,7 @@ class PolarGridHelper extends LineSegments {
     }
     for (let i = 0; i < rings; i++) {
       const color = i & 1 ? color1 : color2;
-      const r = radius2 - radius2 / rings * i;
+      const r = radius - radius / rings * i;
       for (let j = 0; j < divisions; j++) {
         let v = j / divisions * (Math.PI * 2);
         let x = Math.sin(v) * r;
@@ -30407,31 +30408,31 @@ const _v1 = /* @__PURE__ */ new Vector3();
 const _v2 = /* @__PURE__ */ new Vector3();
 const _v3 = /* @__PURE__ */ new Vector3();
 class DirectionalLightHelper extends Object3D {
-  constructor(light, size2, color) {
+  constructor(light, size, color) {
     super();
     this.light = light;
     this.matrix = light.matrixWorld;
     this.matrixAutoUpdate = false;
     this.color = color;
     this.type = "DirectionalLightHelper";
-    if (size2 === void 0)
-      size2 = 1;
+    if (size === void 0)
+      size = 1;
     let geometry = new BufferGeometry();
     geometry.setAttribute("position", new Float32BufferAttribute([
-      -size2,
-      size2,
+      -size,
+      size,
       0,
-      size2,
-      size2,
+      size,
+      size,
       0,
-      size2,
-      -size2,
+      size,
+      -size,
       0,
-      -size2,
-      -size2,
+      -size,
+      -size,
       0,
-      -size2,
-      size2,
+      -size,
+      size,
       0
     ], 3));
     const material = new LineBasicMaterial({ fog: false, toneMapped: false });
@@ -30725,7 +30726,7 @@ class Box3Helper extends LineSegments {
   }
 }
 class PlaneHelper extends Line {
-  constructor(plane, size2 = 1, hex = 16776960) {
+  constructor(plane, size = 1, hex = 16776960) {
     const color = hex;
     const positions = [1, -1, 0, -1, 1, 0, -1, -1, 0, 1, 1, 0, -1, 1, 0, -1, -1, 0, 1, -1, 0, 1, 1, 0];
     const geometry = new BufferGeometry();
@@ -30734,7 +30735,7 @@ class PlaneHelper extends Line {
     super(geometry, new LineBasicMaterial({ color, toneMapped: false }));
     this.type = "PlaneHelper";
     this.plane = plane;
-    this.size = size2;
+    this.size = size;
     const positions2 = [1, 1, 0, -1, 1, 0, -1, -1, 0, 1, 1, 0, -1, -1, 0, 1, -1, 0];
     const geometry2 = new BufferGeometry();
     geometry2.setAttribute("position", new Float32BufferAttribute(positions2, 3));
@@ -30814,26 +30815,26 @@ class ArrowHelper extends Object3D {
   }
 }
 class AxesHelper extends LineSegments {
-  constructor(size2 = 1) {
+  constructor(size = 1) {
     const vertices = [
       0,
       0,
       0,
-      size2,
+      size,
       0,
       0,
       0,
       0,
       0,
       0,
-      size2,
+      size,
       0,
       0,
       0,
       0,
       0,
       0,
-      size2
+      size
     ];
     const colors = [
       1,
@@ -30925,14 +30926,14 @@ class ShapePath {
     function isPointInsidePolygon(inPt, inPolygon) {
       const polyLen = inPolygon.length;
       let inside = false;
-      for (let p = polyLen - 1, q2 = 0; q2 < polyLen; p = q2++) {
+      for (let p = polyLen - 1, q = 0; q < polyLen; p = q++) {
         let edgeLowPt = inPolygon[p];
-        let edgeHighPt = inPolygon[q2];
+        let edgeHighPt = inPolygon[q];
         let edgeDx = edgeHighPt.x - edgeLowPt.x;
         let edgeDy = edgeHighPt.y - edgeLowPt.y;
         if (Math.abs(edgeDy) > Number.EPSILON) {
           if (edgeDy < 0) {
-            edgeLowPt = inPolygon[q2];
+            edgeLowPt = inPolygon[q];
             edgeDx = -edgeDx;
             edgeHighPt = inPolygon[p];
             edgeDy = -edgeDy;
@@ -31475,18 +31476,18 @@ const THREE = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
   sRGBEncoding
 }, Symbol.toStringTag, { value: "Module" }));
 function mitt(n) {
-  return { all: n = n || /* @__PURE__ */ new Map(), on: function(t, e2) {
+  return { all: n = n || /* @__PURE__ */ new Map(), on: function(t, e) {
     var i = n.get(t);
-    i ? i.push(e2) : n.set(t, [e2]);
-  }, off: function(t, e2) {
+    i ? i.push(e) : n.set(t, [e]);
+  }, off: function(t, e) {
     var i = n.get(t);
-    i && (e2 ? i.splice(i.indexOf(e2) >>> 0, 1) : n.set(t, []));
-  }, emit: function(t, e2) {
+    i && (e ? i.splice(i.indexOf(e) >>> 0, 1) : n.set(t, []));
+  }, emit: function(t, e) {
     var i = n.get(t);
     i && i.slice().map(function(n2) {
-      n2(e2);
+      n2(e);
     }), (i = n.get("*")) && i.slice().map(function(n2) {
-      n2(t, e2);
+      n2(t, e);
     });
   } };
 }
@@ -31504,19 +31505,19 @@ class DAG {
   get sortedVertices() {
     return this.mapNodes((value) => value);
   }
-  moveToIsolated(key2) {
-    const vertex2 = this.connectedVertices[key2];
+  moveToIsolated(key) {
+    const vertex2 = this.connectedVertices[key];
     if (!vertex2)
       return;
-    this.isolatedVertices[key2] = vertex2;
-    delete this.connectedVertices[key2];
+    this.isolatedVertices[key] = vertex2;
+    delete this.connectedVertices[key];
   }
-  moveToConnected(key2) {
-    const vertex2 = this.isolatedVertices[key2];
+  moveToConnected(key) {
+    const vertex2 = this.isolatedVertices[key];
     if (!vertex2)
       return;
-    this.connectedVertices[key2] = vertex2;
-    delete this.isolatedVertices[key2];
+    this.connectedVertices[key] = vertex2;
+    delete this.isolatedVertices[key];
   }
   getKey = (v) => {
     if (typeof v === "object") {
@@ -31524,32 +31525,32 @@ class DAG {
     }
     return v;
   };
-  add(key2, value, options) {
-    if (this.allVertices[key2] && this.allVertices[key2].value !== void 0) {
-      throw new Error(`A node with the key ${key2.toString()} already exists`);
+  add(key, value, options) {
+    if (this.allVertices[key] && this.allVertices[key].value !== void 0) {
+      throw new Error(`A node with the key ${key.toString()} already exists`);
     }
-    let vertex2 = this.allVertices[key2];
+    let vertex2 = this.allVertices[key];
     if (!vertex2) {
       vertex2 = {
         value,
         previous: /* @__PURE__ */ new Set(),
         next: /* @__PURE__ */ new Set()
       };
-      this.allVertices[key2] = vertex2;
+      this.allVertices[key] = vertex2;
     } else if (vertex2.value === void 0) {
       vertex2.value = value;
     }
     const hasEdges = vertex2.next.size > 0 || vertex2.previous.size > 0;
     if (!options?.after && !options?.before && !hasEdges) {
-      this.isolatedVertices[key2] = vertex2;
+      this.isolatedVertices[key] = vertex2;
       this.emit("node:added", {
-        key: key2,
+        key,
         type: "isolated",
         value
       });
       return;
     } else {
-      this.connectedVertices[key2] = vertex2;
+      this.connectedVertices[key] = vertex2;
     }
     if (options?.after) {
       const afterArr = Array.isArray(options.after) ? options.after : [options.after];
@@ -31563,11 +31564,11 @@ class DAG {
           this.allVertices[afterKey] = {
             value: void 0,
             previous: /* @__PURE__ */ new Set(),
-            next: /* @__PURE__ */ new Set([key2])
+            next: /* @__PURE__ */ new Set([key])
           };
           this.connectedVertices[afterKey] = this.allVertices[afterKey];
         } else {
-          linkedAfter.next.add(key2);
+          linkedAfter.next.add(key);
           this.moveToConnected(afterKey);
         }
       });
@@ -31583,25 +31584,25 @@ class DAG {
         if (!linkedBefore) {
           this.allVertices[beforeKey] = {
             value: void 0,
-            previous: /* @__PURE__ */ new Set([key2]),
+            previous: /* @__PURE__ */ new Set([key]),
             next: /* @__PURE__ */ new Set()
           };
           this.connectedVertices[beforeKey] = this.allVertices[beforeKey];
         } else {
-          linkedBefore.previous.add(key2);
+          linkedBefore.previous.add(key);
           this.moveToConnected(beforeKey);
         }
       });
     }
     this.emit("node:added", {
-      key: key2,
+      key,
       type: "connected",
       value
     });
     this.needsSort = true;
   }
-  remove(key2) {
-    const removeKey = this.getKey(key2);
+  remove(key) {
+    const removeKey = this.getKey(key);
     const unlinkedVertex = this.isolatedVertices[removeKey];
     if (unlinkedVertex) {
       delete this.isolatedVertices[removeKey];
@@ -31660,24 +31661,24 @@ class DAG {
     for (; index < this.sortedConnectedValues.length; index++) {
       callback(this.sortedConnectedValues[index], index);
     }
-    Reflect.ownKeys(this.isolatedVertices).forEach((key2) => {
-      const vertex2 = this.isolatedVertices[key2];
+    Reflect.ownKeys(this.isolatedVertices).forEach((key) => {
+      const vertex2 = this.isolatedVertices[key];
       if (vertex2.value !== void 0)
         callback(vertex2.value, index++);
     });
   }
-  getValueByKey(key2) {
-    return this.allVertices[key2]?.value;
+  getValueByKey(key) {
+    return this.allVertices[key]?.value;
   }
   getKeyByValue(value) {
-    return Reflect.ownKeys(this.connectedVertices).find((key2) => this.connectedVertices[key2].value === value) ?? Reflect.ownKeys(this.isolatedVertices).find((key2) => this.isolatedVertices[key2].value === value);
+    return Reflect.ownKeys(this.connectedVertices).find((key) => this.connectedVertices[key].value === value) ?? Reflect.ownKeys(this.isolatedVertices).find((key) => this.isolatedVertices[key].value === value);
   }
   sort() {
     const inDegree = /* @__PURE__ */ new Map();
     const zeroInDegreeQueue = [];
     const result = [];
-    const connectedVertexKeysWithValues = Reflect.ownKeys(this.connectedVertices).filter((key2) => {
-      const vertex2 = this.connectedVertices[key2];
+    const connectedVertexKeysWithValues = Reflect.ownKeys(this.connectedVertices).filter((key) => {
+      const vertex2 = this.connectedVertices[key];
       return vertex2.value !== void 0;
     });
     connectedVertexKeysWithValues.forEach((vertex2) => {
@@ -31700,7 +31701,7 @@ class DAG {
     while (zeroInDegreeQueue.length > 0) {
       const vertexKey = zeroInDegreeQueue.shift();
       result.push(vertexKey);
-      const v = connectedVertexKeysWithValues.find((key2) => key2 === vertexKey);
+      const v = connectedVertexKeysWithValues.find((key) => key === vertexKey);
       if (v) {
         this.connectedVertices[v]?.next.forEach((adjVertex) => {
           const adjVertexInDegree = (inDegree.get(adjVertex) || 0) - 1;
@@ -31715,7 +31716,7 @@ class DAG {
       throw new Error("The graph contains a cycle, and thus can not be sorted topologically.");
     }
     const filterUndefined = (value) => value !== void 0;
-    this.sortedConnectedValues = result.map((key2) => this.connectedVertices[key2].value).filter(filterUndefined);
+    this.sortedConnectedValues = result.map((key) => this.connectedVertices[key].value).filter(filterUndefined);
     this.needsSort = false;
   }
   clear() {
@@ -31743,9 +31744,9 @@ class Task {
   start() {
     this.runTask = true;
   }
-  constructor(stage, key2, callback) {
+  constructor(stage, key, callback) {
     this.stage = stage;
-    this.key = key2;
+    this.key = key;
     this.callback = callback;
   }
   run(delta) {
@@ -31761,20 +31762,20 @@ class Stage extends DAG {
     return this.sortedVertices;
   }
   callback = (_, r) => r();
-  constructor(scheduler, key2, callback) {
+  constructor(scheduler, key, callback) {
     super();
     this.scheduler = scheduler;
-    this.key = key2;
+    this.key = key;
     if (callback)
       this.callback = callback.bind(this);
   }
-  createTask(key2, callback, options) {
-    const task = new Task(this, key2, callback);
-    this.add(key2, task, options);
+  createTask(key, callback, options) {
+    const task = new Task(this, key, callback);
+    this.add(key, task, options);
     return task;
   }
-  getTask(key2) {
-    return this.getValueByKey(key2);
+  getTask(key) {
+    return this.getValueByKey(key);
   }
   removeTask = this.remove.bind(this);
   run(delta) {
@@ -31812,16 +31813,16 @@ class Scheduler extends DAG {
       this.clampDeltaTo = options.clampDeltaTo;
     this.run = this.run.bind(this);
   }
-  createStage(key2, options) {
-    const stage = new Stage(this, key2, options?.callback);
-    this.add(key2, stage, {
+  createStage(key, options) {
+    const stage = new Stage(this, key, options?.callback);
+    this.add(key, stage, {
       after: options?.after,
       before: options?.before
     });
     return stage;
   }
-  getStage(key2) {
-    return this.getValueByKey(key2);
+  getStage(key) {
+    return this.getValueByKey(key);
   }
   removeStage = this.remove.bind(this);
   /**
@@ -32099,11 +32100,11 @@ const createDefaultCamera = () => {
   return defaultCamera;
 };
 const setDefaultCameraAspectOnSizeChange = (ctx) => {
-  watch(ctx.size, (size2) => {
+  watch(ctx.size, (size) => {
     if (getThrelteUserData(get_store_value(ctx.camera)).threlteDefaultCamera) {
       ctx.camera.update((c) => {
         const cam = c;
-        cam.aspect = size2.width / size2.height;
+        cam.aspect = size.width / size.height;
         cam.updateProjectionMatrix();
         ctx.invalidate();
         return cam;
@@ -32262,10 +32263,10 @@ const useRenderer = (ctx) => {
   watch([renderer, ctx.dpr], ([renderer2, dpr]) => {
     renderer2?.setPixelRatio(dpr);
   });
-  watch([renderer, ctx.size], ([renderer2, size2]) => {
+  watch([renderer, ctx.size], ([renderer2, size]) => {
     if (renderer2?.xr?.isPresenting)
       return;
-    renderer2?.setSize(size2.width, size2.height);
+    renderer2?.setSize(size.width, size.height);
   });
   watch([renderer, ctx.shadows], ([renderer2, shadows]) => {
     if (!renderer2)
@@ -32307,14 +32308,14 @@ const Canvas = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let { renderMode = "on-demand" } = $$props;
   let { rendererParameters = void 0 } = $$props;
   let { shadows = PCFSoftShadowMap } = $$props;
-  let { size: size2 = void 0 } = $$props;
+  let { size = void 0 } = $$props;
   let { toneMapping = ACESFilmicToneMapping } = $$props;
   let { useLegacyLights = revision >= 155 ? false : true } = $$props;
   let { autoRender = true } = $$props;
   let canvas;
-  let initialized2 = writable(false);
-  $$unsubscribe_initialized = subscribe(initialized2, (value) => $initialized = value);
-  const userSize = writable(size2);
+  let initialized = writable(false);
+  $$unsubscribe_initialized = subscribe(initialized, (value) => $initialized = value);
+  const userSize = writable(size);
   const { parentSize, parentSizeAction } = useParentSize();
   const { useRenderOrders } = injectLegacyFrameCompatibilityContext();
   const contexts = createContexts({
@@ -32343,8 +32344,8 @@ const Canvas = create_ssr_component(($$result, $$props, $$bindings, slots) => {
       return;
     contexts.ctx.renderer.render(ctx.scene, ctx.camera.current);
   });
-  watch([initialized2, contexts.ctx.autoRender], ([initialized3, autoRender2]) => {
-    if (initialized3 && autoRender2) {
+  watch([initialized, contexts.ctx.autoRender], ([initialized2, autoRender2]) => {
+    if (initialized2 && autoRender2) {
       contexts.getCtx().autoRenderTask.start();
     } else {
       contexts.getCtx().autoRenderTask.stop();
@@ -32375,8 +32376,8 @@ const Canvas = create_ssr_component(($$result, $$props, $$bindings, slots) => {
     $$bindings.rendererParameters(rendererParameters);
   if ($$props.shadows === void 0 && $$bindings.shadows && shadows !== void 0)
     $$bindings.shadows(shadows);
-  if ($$props.size === void 0 && $$bindings.size && size2 !== void 0)
-    $$bindings.size(size2);
+  if ($$props.size === void 0 && $$bindings.size && size !== void 0)
+    $$bindings.size(size);
   if ($$props.toneMapping === void 0 && $$bindings.toneMapping && toneMapping !== void 0)
     $$bindings.toneMapping(toneMapping);
   if ($$props.useLegacyLights === void 0 && $$bindings.useLegacyLights && useLegacyLights !== void 0)
@@ -32387,7 +32388,7 @@ const Canvas = create_ssr_component(($$result, $$props, $$bindings, slots) => {
     $$bindings.ctx(ctx);
   $$result.css.add(css$1);
   {
-    userSize.set(size2);
+    userSize.set(size);
   }
   {
     contexts.ctx.colorSpace.set(colorSpace);
@@ -32459,13 +32460,13 @@ const DisposableObject = create_ssr_component(($$result, $$props, $$bindings, sl
 const resolvePropertyPath = (target, propertyPath) => {
   if (propertyPath.includes(".")) {
     const path = propertyPath.split(".");
-    const key2 = path.pop();
+    const key = path.pop();
     for (let i = 0; i < path.length; i += 1) {
       target = target[path[i]];
     }
     return {
       target,
-      key: key2
+      key
     };
   } else {
     return {
@@ -32500,11 +32501,11 @@ const useAttach = () => {
     if (typeof attach === "function") {
       detachFn = attach(parent, instance);
     } else {
-      const { target, key: key2 } = resolvePropertyPath(parent, attach);
-      valueBeforeAttach = target[key2];
-      target[key2] = instance;
+      const { target, key } = resolvePropertyPath(parent, attach);
+      valueBeforeAttach = target[key];
+      target[key] = instance;
       attachedTo = target;
-      attachedKey = key2;
+      attachedKey = key;
     }
     isAttached = true;
     invalidate();
@@ -32544,25 +32545,25 @@ const isPerspectiveCameraOrOrthographicCamera = (value) => {
   return isPerspectiveCamera$1(value) || isOrthographicCamera$1(value);
 };
 const useCamera = () => {
-  const { invalidate, size: size2, camera } = useThrelte();
+  const { invalidate, size, camera } = useThrelte();
   let currentInstance;
   let unsubscribe = void 0;
   onDestroy(() => {
     unsubscribe?.();
   });
-  const subscriber = (size3) => {
+  const subscriber = (size2) => {
     if (!currentInstance)
       return;
     if (isOrthographicCamera$1(currentInstance)) {
-      currentInstance.left = size3.width / -2;
-      currentInstance.right = size3.width / 2;
-      currentInstance.top = size3.height / 2;
-      currentInstance.bottom = size3.height / -2;
+      currentInstance.left = size2.width / -2;
+      currentInstance.right = size2.width / 2;
+      currentInstance.top = size2.height / 2;
+      currentInstance.bottom = size2.height / -2;
       currentInstance.updateProjectionMatrix();
       currentInstance.updateMatrixWorld();
       invalidate();
     } else if (isPerspectiveCamera$1(currentInstance)) {
-      currentInstance.aspect = size3.width / size3.height;
+      currentInstance.aspect = size2.width / size2.height;
       currentInstance.updateProjectionMatrix();
       currentInstance.updateMatrixWorld();
       invalidate();
@@ -32575,7 +32576,7 @@ const useCamera = () => {
       return;
     }
     currentInstance = instance;
-    unsubscribe = size2.subscribe(subscriber);
+    unsubscribe = size.subscribe(subscriber);
   };
   const makeDefaultCamera = (instance, makeDefault) => {
     if (!isCamera(instance) || !makeDefault)
@@ -32607,7 +32608,7 @@ const createRawEventDispatcher = () => {
   });
   return dispatchRawEvent;
 };
-const useCreateEvent$1 = () => {
+const useCreateEvent = () => {
   createRawEventDispatcher();
   const cleanupFunctions = [];
   const updateRef = (newRef) => {
@@ -32721,28 +32722,28 @@ const memoizeProp = (value) => {
     return true;
   return false;
 };
-const createSetter = (target, key2, value) => {
-  if (!Array.isArray(value) && typeof value === "number" && typeof target[key2]?.setScalar === "function" && // colors do have a setScalar function, but we don't want to use it, because
+const createSetter = (target, key, value) => {
+  if (!Array.isArray(value) && typeof value === "number" && typeof target[key]?.setScalar === "function" && // colors do have a setScalar function, but we don't want to use it, because
   // the hex notation (i.e. 0xff0000) is very popular and matches the number
   // type. So we exclude colors here.
-  !target[key2]?.isColor) {
-    return (target2, key3, value2) => {
-      target2[key3].setScalar(value2);
+  !target[key]?.isColor) {
+    return (target2, key2, value2) => {
+      target2[key2].setScalar(value2);
     };
   } else {
-    if (typeof target[key2]?.set === "function") {
+    if (typeof target[key]?.set === "function") {
       if (Array.isArray(value)) {
-        return (target2, key3, value2) => {
-          target2[key3].set(...value2);
+        return (target2, key2, value2) => {
+          target2[key2].set(...value2);
         };
       } else {
-        return (target2, key3, value2) => {
-          target2[key3].set(value2);
+        return (target2, key2, value2) => {
+          target2[key2].set(value2);
         };
       }
     } else {
-      return (target2, key3, value2) => {
-        target2[key3] = value2;
+      return (target2, key2, value2) => {
+        target2[key2] = value2;
       };
     }
   }
@@ -32762,29 +32763,29 @@ const useProps = () => {
         value
       });
     }
-    const { key: key2, target } = resolvePropertyPath(instance, propertyPath);
+    const { key, target } = resolvePropertyPath(instance, propertyPath);
     if (value !== void 0 && value !== null) {
       const memoizedSetter = memoizedSetters.get(propertyPath);
       if (memoizedSetter) {
-        memoizedSetter(target, key2, value);
+        memoizedSetter(target, key, value);
       } else {
-        const setter = createSetter(target, key2, value);
+        const setter = createSetter(target, key, value);
         memoizedSetters.set(propertyPath, setter);
-        setter(target, key2, value);
+        setter(target, key, value);
       }
     } else {
-      createSetter(target, key2, value)(target, key2, value);
+      createSetter(target, key, value)(target, key, value);
     }
     if (options.manualCamera)
       return;
-    if (updateProjectionMatrixKeys.has(key2) && (target.isPerspectiveCamera || target.isOrthographicCamera)) {
+    if (updateProjectionMatrixKeys.has(key) && (target.isPerspectiveCamera || target.isOrthographicCamera)) {
       target.updateProjectionMatrix();
     }
   };
   const updateProps = (instance, props, options) => {
-    for (const key2 in props) {
-      if (!ignoredProps.has(key2) && !options.pluginsProps?.includes(key2)) {
-        setProp(instance, key2, props[key2], options);
+    for (const key in props) {
+      if (!ignoredProps.has(key) && !options.pluginsProps?.includes(key)) {
+        setProp(instance, key, props[key], options);
       }
       invalidate();
     }
@@ -32810,15 +32811,15 @@ const T$1 = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   const argsIsConstructorParameters = (args2) => {
     return Array.isArray(args2);
   };
-  const createEvent = useCreateEvent$1();
+  const createEvent = useCreateEvent();
   let ref = isClass(is) && argsIsConstructorParameters(args) ? new is(...args) : isClass(
     is
   ) ? new is() : is;
   createEvent.updateRef(ref);
-  let initialized2 = false;
+  let initialized = false;
   const maybeSetRef = () => {
-    if (!initialized2) {
-      initialized2 = true;
+    if (!initialized) {
+      initialized = true;
       return;
     }
     ref = isClass(is) && argsIsConstructorParameters(args) ? new is(...args) : isClass(
@@ -32935,15 +32936,15 @@ function useTask(keyOrFn, fnOrOptions, options) {
       started: readable(false)
     };
   }
-  let key2;
+  let key;
   let fn;
   let opts;
   if (DAG.isKey(keyOrFn)) {
-    key2 = keyOrFn;
+    key = keyOrFn;
     fn = fnOrOptions;
     opts = options;
   } else {
-    key2 = Symbol("useTask");
+    key = Symbol("useTask");
     fn = keyOrFn;
     opts = fnOrOptions;
   }
@@ -32988,7 +32989,7 @@ function useTask(keyOrFn, fnOrOptions, options) {
   }
   const { autoInvalidations } = getContext("threlte-internal-context");
   const started = writable(false);
-  const task = stage.createTask(key2, fn, opts);
+  const task = stage.createTask(key, fn, opts);
   const start = () => {
     started.set(true);
     if (opts?.autoInvalidate ?? true) {
@@ -33011,7 +33012,7 @@ function useTask(keyOrFn, fnOrOptions, options) {
   onDestroy(() => {
     if (!stage)
       return;
-    stage.removeTask(key2);
+    stage.removeTask(key);
   });
   return {
     task,
@@ -33056,17 +33057,17 @@ const forwardEventHandlers = () => {
     if (!dispatchingComponent2)
       return;
     Object.entries(component.$$.callbacks).forEach((callback) => {
-      const [key2, value] = callback;
-      if (key2 in dispatchingComponent2.$$.callbacks && Array.isArray(dispatchingComponent2.$$.callbacks[key2])) {
-        dispatchingComponent2.$$.callbacks[key2].push(...value);
+      const [key, value] = callback;
+      if (key in dispatchingComponent2.$$.callbacks && Array.isArray(dispatchingComponent2.$$.callbacks[key])) {
+        dispatchingComponent2.$$.callbacks[key].push(...value);
       } else {
-        dispatchingComponent2.$$.callbacks[key2] = value;
+        dispatchingComponent2.$$.callbacks[key] = value;
       }
     });
   });
   return dispatchingComponent;
 };
-const useHasEventListeners$1 = () => {
+const useHasEventListeners = () => {
   const component = get_current_component();
   const hasEventListeners = (type) => {
     const callbacks = component.$$.callbacks;
@@ -33088,11 +33089,11 @@ const isPerspectiveCamera = (o) => {
 const isOrthographicCameraOrPerspectiveCamera = (o) => {
   return isOrthographicCamera(o) || isPerspectiveCamera(o);
 };
-const defaultCalculatePosition = (obj, camera, size2) => {
+const defaultCalculatePosition = (obj, camera, size) => {
   const objectPos = v1.setFromMatrixPosition(obj.matrixWorld);
   objectPos.project(camera);
-  const widthHalf = size2.width / 2;
-  const heightHalf = size2.height / 2;
+  const widthHalf = size.width / 2;
+  const heightHalf = size.height / 2;
   return [objectPos.x * widthHalf + widthHalf, -(objectPos.y * heightHalf) + heightHalf];
 };
 const isObjectBehindCamera = (el, camera) => {
@@ -33144,7 +33145,7 @@ const styleDeclarationKeyToCssString = (s) => {
   return s.split(/(?=[A-Z])/).join("-").toLowerCase();
 };
 const compileStyles = (styles) => {
-  return Object.entries(styles).filter(([_, value]) => !!value).map(([key2, value]) => `${styleDeclarationKeyToCssString(key2)}: ${value}`).join("; ");
+  return Object.entries(styles).filter(([_, value]) => !!value).map(([key, value]) => `${styleDeclarationKeyToCssString(key)}: ${value}`).join("; ");
 };
 const updateStyles = (store, styles) => {
   store.update((values) => {
@@ -33195,9 +33196,9 @@ const HTML = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let { portal = void 0 } = $$props;
   const dispatch = createRawEventDispatcher();
   let { ref = new Group() } = $$props;
-  const { renderer, camera, scene, size: size2 } = useThrelte();
+  const { renderer, camera, scene, size } = useThrelte();
   $$unsubscribe_camera = subscribe(camera, (value) => $camera = value);
-  $$unsubscribe_size = subscribe(size2, (value) => $size = value);
+  $$unsubscribe_size = subscribe(size, (value) => $size = value);
   const isViableCamera = (c) => {
     return c.isPerspectiveCamera || c.isOrthographicCamera;
   };
@@ -33214,11 +33215,11 @@ const HTML = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   let el = document.createElement(as);
   let transformOuterRef;
   let transformInnerRef;
-  const { hasEventListeners } = useHasEventListeners$1();
+  const { hasEventListeners } = useHasEventListeners();
   let raytraceTarget = typeof occlude === "boolean" && occlude === true ? [scene] : Array.isArray(occlude) ? occlude : void 0;
-  const widthHalf = derived(size2, (size3) => size3.width / 2);
+  const widthHalf = derived(size, (size2) => size2.width / 2);
   $$unsubscribe_widthHalf = subscribe(widthHalf, (value) => $widthHalf = value);
-  const heightHalf = derived(size2, (size3) => size3.height / 2);
+  const heightHalf = derived(size, (size2) => size2.height / 2);
   $$unsubscribe_heightHalf = subscribe(heightHalf, (value) => $heightHalf = value);
   let styles = {
     common: { el: writable({}) },
@@ -33429,356 +33430,6 @@ const HTML = create_ssr_component(($$result, $$props, $$bindings, slots) => {
   $$unsubscribe_noTransformDivStyles();
   return $$rendered;
 });
-const HorizontalBlurShader = {
-  name: "HorizontalBlurShader",
-  uniforms: {
-    "tDiffuse": { value: null },
-    "h": { value: 1 / 512 }
-  },
-  vertexShader: (
-    /* glsl */
-    `
-
-		varying vec2 vUv;
-
-		void main() {
-
-			vUv = uv;
-			gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-
-		}`
-  ),
-  fragmentShader: (
-    /* glsl */
-    `
-
-		uniform sampler2D tDiffuse;
-		uniform float h;
-
-		varying vec2 vUv;
-
-		void main() {
-
-			vec4 sum = vec4( 0.0 );
-
-			sum += texture2D( tDiffuse, vec2( vUv.x - 4.0 * h, vUv.y ) ) * 0.051;
-			sum += texture2D( tDiffuse, vec2( vUv.x - 3.0 * h, vUv.y ) ) * 0.0918;
-			sum += texture2D( tDiffuse, vec2( vUv.x - 2.0 * h, vUv.y ) ) * 0.12245;
-			sum += texture2D( tDiffuse, vec2( vUv.x - 1.0 * h, vUv.y ) ) * 0.1531;
-			sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y ) ) * 0.1633;
-			sum += texture2D( tDiffuse, vec2( vUv.x + 1.0 * h, vUv.y ) ) * 0.1531;
-			sum += texture2D( tDiffuse, vec2( vUv.x + 2.0 * h, vUv.y ) ) * 0.12245;
-			sum += texture2D( tDiffuse, vec2( vUv.x + 3.0 * h, vUv.y ) ) * 0.0918;
-			sum += texture2D( tDiffuse, vec2( vUv.x + 4.0 * h, vUv.y ) ) * 0.051;
-
-			gl_FragColor = sum;
-
-		}`
-  )
-};
-const VerticalBlurShader = {
-  name: "VerticalBlurShader",
-  uniforms: {
-    "tDiffuse": { value: null },
-    "v": { value: 1 / 512 }
-  },
-  vertexShader: (
-    /* glsl */
-    `
-
-		varying vec2 vUv;
-
-		void main() {
-
-			vUv = uv;
-			gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-
-		}`
-  ),
-  fragmentShader: (
-    /* glsl */
-    `
-
-		uniform sampler2D tDiffuse;
-		uniform float v;
-
-		varying vec2 vUv;
-
-		void main() {
-
-			vec4 sum = vec4( 0.0 );
-
-			sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y - 4.0 * v ) ) * 0.051;
-			sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y - 3.0 * v ) ) * 0.0918;
-			sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y - 2.0 * v ) ) * 0.12245;
-			sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y - 1.0 * v ) ) * 0.1531;
-			sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y ) ) * 0.1633;
-			sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y + 1.0 * v ) ) * 0.1531;
-			sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y + 2.0 * v ) ) * 0.12245;
-			sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y + 3.0 * v ) ) * 0.0918;
-			sum += texture2D( tDiffuse, vec2( vUv.x, vUv.y + 4.0 * v ) ) * 0.051;
-
-			gl_FragColor = sum;
-
-		}`
-  )
-};
-const useMemo = (callback) => {
-  let initialCallDone = false;
-  const memoized = writable(callback());
-  const memoize = (..._args) => {
-    if (!initialCallDone) {
-      initialCallDone = true;
-      return;
-    }
-    memoized.set(callback());
-  };
-  return {
-    ...memoized,
-    memoize
-  };
-};
-const ContactShadows = create_ssr_component(($$result, $$props, $$bindings, slots) => {
-  let $$restProps = compute_rest_props($$props, [
-    "opacity",
-    "width",
-    "height",
-    "blur",
-    "far",
-    "smooth",
-    "resolution",
-    "frames",
-    "scale",
-    "color",
-    "depthWrite",
-    "refresh"
-  ]);
-  let $depthMaterial, $$unsubscribe_depthMaterial;
-  let $planeGeometry, $$unsubscribe_planeGeometry;
-  let $renderTargetBlur, $$unsubscribe_renderTargetBlur;
-  let $renderTarget, $$unsubscribe_renderTarget;
-  let $blurPlane, $$unsubscribe_blurPlane;
-  let $scaledHeight, $$unsubscribe_scaledHeight;
-  let $scaledWidth, $$unsubscribe_scaledWidth;
-  let $components, $$unsubscribe_components;
-  let { opacity = 1 } = $$props;
-  let { width = 1 } = $$props;
-  let { height = 1 } = $$props;
-  let { blur = 1 } = $$props;
-  let { far = 10 } = $$props;
-  let { smooth = true } = $$props;
-  let { resolution = 512 } = $$props;
-  let { frames = Infinity } = $$props;
-  let { scale = 10 } = $$props;
-  let { color = "#000000" } = $$props;
-  let { depthWrite = false } = $$props;
-  const { scene, renderer } = useThrelte();
-  const scaledWidth = useMemo(() => {
-    return width * (Array.isArray(scale) ? scale[0] : scale || 1);
-  });
-  $$unsubscribe_scaledWidth = subscribe(scaledWidth, (value) => $scaledWidth = value);
-  const scaledHeight = useMemo(() => {
-    return height * (Array.isArray(scale) ? scale[1] : scale || 1);
-  });
-  $$unsubscribe_scaledHeight = subscribe(scaledHeight, (value) => $scaledHeight = value);
-  const renderTarget = useMemo(() => {
-    const rt = new WebGLRenderTarget(resolution, resolution);
-    rt.texture.generateMipmaps = false;
-    if ("colorSpace" in rt.texture) {
-      rt.texture.colorSpace = renderer.outputColorSpace;
-    } else {
-      rt.texture.encoding = renderer.outputEncoding;
-    }
-    return rt;
-  });
-  $$unsubscribe_renderTarget = subscribe(renderTarget, (value) => $renderTarget = value);
-  const renderTargetBlur = useMemo(() => {
-    const rt = new WebGLRenderTarget(resolution, resolution);
-    rt.texture.generateMipmaps = false;
-    return rt;
-  });
-  $$unsubscribe_renderTargetBlur = subscribe(renderTargetBlur, (value) => $renderTargetBlur = value);
-  const planeGeometry = useMemo(() => {
-    return new PlaneGeometry($scaledWidth, $scaledHeight).rotateX(Math.PI / 2);
-  });
-  $$unsubscribe_planeGeometry = subscribe(planeGeometry, (value) => $planeGeometry = value);
-  const blurPlane = useMemo(() => {
-    return new Mesh($planeGeometry);
-  });
-  $$unsubscribe_blurPlane = subscribe(blurPlane, (value) => $blurPlane = value);
-  const depthMaterial = useMemo(() => {
-    const dm = new MeshDepthMaterial({ depthTest: false, depthWrite: false });
-    dm.onBeforeCompile = (shader) => {
-      shader.uniforms = {
-        ...shader.uniforms,
-        uColor: {
-          value: new Color(color).convertSRGBToLinear()
-        }
-      };
-      shader.fragmentShader = "uniform vec3 uColor;\n" + shader.fragmentShader;
-      shader.fragmentShader = shader.fragmentShader.replace("vec4( vec3( 1.0 - fragCoordZ ), opacity );", "vec4( uColor, ( 1.0 - fragCoordZ ) * 1.0 );");
-      shader.fragmentShader = shader.fragmentShader.replace("vec4(vec3(1.0-fragCoordZ),opacity);", "vec4(uColor,(1.0-fragCoordZ)*1.0);");
-    };
-    return dm;
-  });
-  $$unsubscribe_depthMaterial = subscribe(depthMaterial, (value) => $depthMaterial = value);
-  const horizontalBlurMaterial = new ShaderMaterial({
-    ...HorizontalBlurShader,
-    depthTest: false
-  });
-  const verticalBlurMaterial = new ShaderMaterial({ ...VerticalBlurShader, depthTest: false });
-  const shadowCamera = new OrthographicCamera(-$scaledWidth / 2, $scaledWidth / 2, $scaledHeight / 2, -$scaledHeight / 2, 0, far);
-  shadowCamera.updateProjectionMatrix();
-  const shadowMaterial = new MeshBasicMaterial({
-    map: $renderTarget.texture,
-    transparent: true,
-    opacity,
-    depthWrite
-  });
-  const blurShadows = (blur2) => {
-    const bp = $blurPlane;
-    bp.visible = true;
-    bp.material = horizontalBlurMaterial;
-    horizontalBlurMaterial.uniforms.tDiffuse.value = $renderTarget.texture;
-    horizontalBlurMaterial.uniforms.h.value = blur2 * 1 / 256;
-    renderer.setRenderTarget($renderTargetBlur);
-    renderer.render(bp, shadowCamera);
-    bp.material = verticalBlurMaterial;
-    verticalBlurMaterial.uniforms.tDiffuse.value = $renderTargetBlur.texture;
-    verticalBlurMaterial.uniforms.v.value = blur2 * 1 / 256;
-    renderer.setRenderTarget($renderTarget);
-    renderer.render(bp, shadowCamera);
-    bp.visible = false;
-  };
-  const renderShadows = () => {
-    const initialBackground = scene.background;
-    scene.background = null;
-    const initialOverrideMaterial = scene.overrideMaterial;
-    scene.overrideMaterial = $depthMaterial;
-    const initialClearAlpha = renderer.getClearAlpha();
-    renderer.setClearAlpha(0);
-    renderer.setRenderTarget($renderTarget);
-    renderer.render(scene, shadowCamera);
-    scene.overrideMaterial = initialOverrideMaterial;
-    blurShadows(blur);
-    if (smooth)
-      blurShadows(blur * 0.4);
-    renderer.setRenderTarget(null);
-    scene.background = initialBackground;
-    renderer.setClearAlpha(initialClearAlpha);
-  };
-  const refresh = () => {
-    renderShadows();
-  };
-  let count = 0;
-  useTask(() => {
-    if (frames === Infinity || count < frames) {
-      renderShadows();
-      count += 1;
-    }
-  });
-  onDestroy(() => {
-    $renderTarget.dispose();
-    $renderTargetBlur.dispose();
-    $planeGeometry.dispose();
-    $depthMaterial.dispose();
-    horizontalBlurMaterial.dispose();
-    verticalBlurMaterial.dispose();
-    shadowMaterial.dispose();
-  });
-  const components = forwardEventHandlers();
-  $$unsubscribe_components = subscribe(components, (value) => $components = value);
-  if ($$props.opacity === void 0 && $$bindings.opacity && opacity !== void 0)
-    $$bindings.opacity(opacity);
-  if ($$props.width === void 0 && $$bindings.width && width !== void 0)
-    $$bindings.width(width);
-  if ($$props.height === void 0 && $$bindings.height && height !== void 0)
-    $$bindings.height(height);
-  if ($$props.blur === void 0 && $$bindings.blur && blur !== void 0)
-    $$bindings.blur(blur);
-  if ($$props.far === void 0 && $$bindings.far && far !== void 0)
-    $$bindings.far(far);
-  if ($$props.smooth === void 0 && $$bindings.smooth && smooth !== void 0)
-    $$bindings.smooth(smooth);
-  if ($$props.resolution === void 0 && $$bindings.resolution && resolution !== void 0)
-    $$bindings.resolution(resolution);
-  if ($$props.frames === void 0 && $$bindings.frames && frames !== void 0)
-    $$bindings.frames(frames);
-  if ($$props.scale === void 0 && $$bindings.scale && scale !== void 0)
-    $$bindings.scale(scale);
-  if ($$props.color === void 0 && $$bindings.color && color !== void 0)
-    $$bindings.color(color);
-  if ($$props.depthWrite === void 0 && $$bindings.depthWrite && depthWrite !== void 0)
-    $$bindings.depthWrite(depthWrite);
-  if ($$props.refresh === void 0 && $$bindings.refresh && refresh !== void 0)
-    $$bindings.refresh(refresh);
-  let $$settled;
-  let $$rendered;
-  let previous_head = $$result.head;
-  do {
-    $$settled = true;
-    $$result.head = previous_head;
-    {
-      scaledWidth.memoize([width, scale]);
-    }
-    {
-      scaledHeight.memoize(height, scale);
-    }
-    {
-      renderTarget.memoize(resolution);
-    }
-    {
-      renderTargetBlur.memoize(resolution);
-    }
-    {
-      planeGeometry.memoize($scaledWidth, $scaledHeight);
-    }
-    {
-      blurPlane.memoize($planeGeometry);
-    }
-    {
-      depthMaterial.memoize(color);
-    }
-    $$rendered = `${validate_component(T.Group, "T.Group").$$render(
-      $$result,
-      Object.assign({}, $$restProps, { this: $components }),
-      {
-        this: ($$value) => {
-          $components = $$value;
-          $$settled = false;
-        }
-      },
-      {
-        default: ({ ref }) => {
-          return `${validate_component(T.Group, "T.Group").$$render($$result, { "rotation.x": Math.PI / 2 }, {}, {
-            default: () => {
-              return `${validate_component(T.Mesh, "T.Mesh").$$render(
-                $$result,
-                {
-                  "scale.y": -1,
-                  "rotation.x": -Math.PI / 2,
-                  material: shadowMaterial,
-                  geometry: $planeGeometry
-                },
-                {},
-                {}
-              )} ${validate_component(T, "T").$$render($$result, { is: shadowCamera, manual: true }, {}, {})} ${slots.default ? slots.default({ ref }) : ``}`;
-            }
-          })}`;
-        }
-      }
-    )}`;
-  } while (!$$settled);
-  $$unsubscribe_depthMaterial();
-  $$unsubscribe_planeGeometry();
-  $$unsubscribe_renderTargetBlur();
-  $$unsubscribe_renderTarget();
-  $$unsubscribe_blurPlane();
-  $$unsubscribe_scaledHeight();
-  $$unsubscribe_scaledWidth();
-  $$unsubscribe_components();
-  return $$rendered;
-});
 const _changeEvent = { type: "change" };
 const _startEvent = { type: "start" };
 const _endEvent = { type: "end" };
@@ -33856,7 +33507,7 @@ let OrbitControls$1 = class OrbitControls extends EventDispatcher {
       state = STATE.NONE;
     };
     this.update = function() {
-      const offset2 = new Vector3();
+      const offset = new Vector3();
       const quat = new Quaternion().setFromUnitVectors(object.up, new Vector3(0, 1, 0));
       const quatInverse = quat.clone().invert();
       const lastPosition = new Vector3();
@@ -33865,9 +33516,9 @@ let OrbitControls$1 = class OrbitControls extends EventDispatcher {
       const twoPI = 2 * Math.PI;
       return function update2(deltaTime = null) {
         const position = scope.object.position;
-        offset2.copy(position).sub(scope.target);
-        offset2.applyQuaternion(quat);
-        spherical.setFromVector3(offset2);
+        offset.copy(position).sub(scope.target);
+        offset.applyQuaternion(quat);
+        spherical.setFromVector3(offset);
         if (scope.autoRotate && state === STATE.NONE) {
           rotateLeft(getAutoRotationAngle(deltaTime));
         }
@@ -33910,9 +33561,9 @@ let OrbitControls$1 = class OrbitControls extends EventDispatcher {
         } else {
           spherical.radius = clampDistance(spherical.radius * scale);
         }
-        offset2.setFromSpherical(spherical);
-        offset2.applyQuaternion(quatInverse);
-        position.copy(scope.target).add(offset2);
+        offset.setFromSpherical(spherical);
+        offset.applyQuaternion(quatInverse);
+        position.copy(scope.target).add(offset);
         scope.object.lookAt(scope.target);
         if (scope.enableDamping === true) {
           sphericalDelta.theta *= 1 - scope.dampingFactor;
@@ -33926,7 +33577,7 @@ let OrbitControls$1 = class OrbitControls extends EventDispatcher {
         if (scope.zoomToCursor && performCursorZoom) {
           let newRadius = null;
           if (scope.object.isPerspectiveCamera) {
-            const prevRadius = offset2.length();
+            const prevRadius = offset.length();
             newRadius = clampDistance(prevRadius * scale);
             const radiusDelta = prevRadius - newRadius;
             scope.object.position.addScaledVector(dollyDirection, radiusDelta);
@@ -33941,7 +33592,7 @@ let OrbitControls$1 = class OrbitControls extends EventDispatcher {
             mouseAfter.unproject(scope.object);
             scope.object.position.sub(mouseAfter).add(mouseBefore);
             scope.object.updateMatrixWorld();
-            newRadius = offset2.length();
+            newRadius = offset.length();
           } else {
             console.warn("WARNING: OrbitControls.js encountered an unknown camera type - zoom to cursor disabled.");
             scope.zoomToCursor = false;
@@ -34058,13 +33709,13 @@ let OrbitControls$1 = class OrbitControls extends EventDispatcher {
       };
     }();
     const pan = function() {
-      const offset2 = new Vector3();
+      const offset = new Vector3();
       return function pan2(deltaX, deltaY) {
         const element = scope.domElement;
         if (scope.object.isPerspectiveCamera) {
           const position = scope.object.position;
-          offset2.copy(position).sub(scope.target);
-          let targetDistance = offset2.length();
+          offset.copy(position).sub(scope.target);
+          let targetDistance = offset.length();
           targetDistance *= Math.tan(scope.object.fov / 2 * Math.PI / 180);
           panLeft(2 * deltaX * targetDistance / element.clientHeight, scope.object.matrix);
           panUp(2 * deltaY * targetDistance / element.clientHeight, scope.object.matrix);
@@ -35144,997 +34795,89 @@ void main() {
 	${ShaderChunk.tonemapping_fragment}
 	${ShaderChunk.colorspace_fragment}
 }`;
-const useRapier = () => {
-  return getContext("threlte-rapier-context");
-};
-const applyBitMask = (collidersMap, bitMask) => {
-  collidersMap.forEach((c) => {
-    if (c && c.collider && c.collider.isValid()) {
-      c.collider.setCollisionGroups(bitMask);
-    }
-  });
-};
-const useCollisionGroups = () => {
-  const collidersMap = /* @__PURE__ */ new Map();
-  const bitMaskStore = getContext("threlte-rapier-collision-group");
-  if (!bitMaskStore)
-    return {
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      registerColliders: (colliders) => {
-      },
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      removeColliders: (colliders) => {
-      }
-    };
-  let bitMask = get_store_value(bitMaskStore);
-  const unsubscribe = bitMaskStore.subscribe((newBitMask) => {
-    bitMask = newBitMask;
-    applyBitMask(collidersMap, newBitMask);
-  });
-  onDestroy(unsubscribe);
-  const registerColliders = (colliders) => {
-    colliders.forEach((c) => {
-      if (!collidersMap.has(c.handle)) {
-        collidersMap.set(c.handle, {
-          collider: c,
-          initialCollisionGroup: c.collisionGroups()
-        });
-      }
-    });
-    applyBitMask(collidersMap, bitMask);
-  };
-  const removeColliders = (colliders) => {
-    colliders.forEach((c) => {
-      const mapItem = collidersMap.get(c.handle);
-      if (mapItem) {
-        if (c && c.isValid()) {
-          c.setCollisionGroups(mapItem.initialCollisionGroup);
-        }
-      }
-      collidersMap.delete(c.handle);
-    });
-  };
-  return {
-    registerColliders,
-    removeColliders
-  };
-};
-const useRigidBody = () => {
-  return getContext("threlte-rapier-rigidbody");
-};
-const createRapierContext = (...args) => {
-  const world = new RAPIER.World(...args);
-  const colliderObjects = /* @__PURE__ */ new Map();
-  const rigidBodyObjects = /* @__PURE__ */ new Map();
-  const rigidBodyEventDispatchers = /* @__PURE__ */ new Map();
-  const colliderEventDispatchers = /* @__PURE__ */ new Map();
-  const addColliderToContext = (collider, object, eventDispatcher) => {
-    colliderObjects.set(collider.handle, object);
-    colliderEventDispatchers.set(collider.handle, eventDispatcher);
-  };
-  const removeColliderFromContext = (collider) => {
-    colliderObjects.delete(collider.handle);
-    colliderEventDispatchers.delete(collider.handle);
-  };
-  const addRigidBodyToContext = (rigidBody, object, eventDispatcher) => {
-    rigidBodyObjects.set(rigidBody.handle, object);
-    rigidBodyEventDispatchers.set(rigidBody.handle, eventDispatcher);
-  };
-  const removeRigidBodyFromContext = (rigidBody) => {
-    rigidBodyObjects.delete(rigidBody.handle);
-    rigidBodyEventDispatchers.delete(rigidBody.handle);
-  };
-  const pause = () => {
-  };
-  const resume = () => {
-  };
-  return {
-    rapier: RAPIER,
-    world,
-    colliderObjects,
-    rigidBodyObjects,
-    rigidBodyEventDispatchers,
-    colliderEventDispatchers,
-    addColliderToContext,
-    removeColliderFromContext,
-    addRigidBodyToContext,
-    removeRigidBodyFromContext,
-    debug: writable(false),
-    pause,
-    resume,
-    paused: readable(false)
-  };
-};
-const tempObject = new Object3D();
-const tempVector3 = new Vector3();
-const tempQuaternion$1 = new Quaternion();
-const getEventDispatchers = (ctx, collider1, collider2) => {
-  const colliderDispatcher1 = ctx.colliderEventDispatchers.get(collider1.handle);
-  const colliderDispatcher2 = ctx.colliderEventDispatchers.get(collider2.handle);
-  const rigidBody1 = collider1.parent();
-  const rigidBody2 = collider2.parent();
-  const rigidBodyDispatcher1 = rigidBody1 ? ctx.rigidBodyEventDispatchers.get(rigidBody1.handle) : void 0;
-  const rigidBodyDispatcher2 = rigidBody2 ? ctx.rigidBodyEventDispatchers.get(rigidBody2.handle) : void 0;
-  return {
-    colliderDispatcher1,
-    colliderDispatcher2,
-    rigidBodyDispatcher1,
-    rigidBodyDispatcher2
-  };
-};
-const useFrameHandler = (ctx, stage) => {
-  const eventQueue = new EventQueue(false);
-  const { start, started, stop } = useTask((delta) => {
-    const { world } = ctx;
-    world.timestep = Math.min(0.1, delta);
-    world.step(eventQueue);
-    ctx.rigidBodyObjects.forEach((mesh, handle) => {
-      const rigidBody = world.getRigidBody(handle);
-      if (!rigidBody)
-        return;
-      const dispatcher = ctx.rigidBodyEventDispatchers.get(handle);
-      if (!rigidBody || !rigidBody.isValid())
-        return;
-      if (dispatcher) {
-        if (rigidBody.isSleeping() && !mesh.userData.isSleeping) {
-          dispatcher("sleep");
-        }
-        if (!rigidBody.isSleeping() && mesh.userData.isSleeping) {
-          dispatcher("wake");
-        }
-        mesh.userData.isSleeping = rigidBody.isSleeping();
-      }
-      if (!rigidBody || rigidBody.isSleeping() || rigidBody.isFixed() || !mesh.parent) {
-        return;
-      }
-      const { x, y, z } = rigidBody.translation();
-      tempObject.position.set(x, y, z);
-      const rotation = rigidBody.rotation();
-      tempQuaternion$1.set(rotation.x, rotation.y, rotation.z, rotation.w);
-      tempObject.rotation.setFromQuaternion(tempQuaternion$1);
-      mesh.getWorldScale(tempVector3);
-      tempObject.scale.copy(tempVector3);
-      tempObject.updateMatrix();
-      tempObject.applyMatrix4(mesh.parent.matrixWorld.clone().invert());
-      tempObject.updateMatrix();
-      mesh.position.setFromMatrixPosition(tempObject.matrix);
-      mesh.rotation.setFromRotationMatrix(tempObject.matrix);
-    });
-    eventQueue.drainContactForceEvents((e2) => {
-      const collider1 = world.getCollider(e2.collider1());
-      const collider2 = world.getCollider(e2.collider2());
-      if (!collider1 || !collider2) {
-        return;
-      }
-      const { colliderDispatcher1, colliderDispatcher2, rigidBodyDispatcher1, rigidBodyDispatcher2 } = getEventDispatchers(ctx, collider1, collider2);
-      const rigidBody1 = collider1.parent();
-      const rigidBody2 = collider2.parent();
-      colliderDispatcher1?.("contact", {
-        targetCollider: collider2,
-        targetRigidBody: rigidBody2,
-        maxForceDirection: e2.maxForceDirection(),
-        maxForceMagnitude: e2.maxForceMagnitude(),
-        totalForce: e2.totalForce(),
-        totalForceMagnitude: e2.totalForceMagnitude()
-      });
-      colliderDispatcher2?.("contact", {
-        targetCollider: collider1,
-        targetRigidBody: rigidBody1,
-        maxForceDirection: e2.maxForceDirection(),
-        maxForceMagnitude: e2.maxForceMagnitude(),
-        totalForce: e2.totalForce(),
-        totalForceMagnitude: e2.totalForceMagnitude()
-      });
-      rigidBodyDispatcher1?.("contact", {
-        targetCollider: collider2,
-        targetRigidBody: rigidBody2,
-        maxForceDirection: e2.maxForceDirection(),
-        maxForceMagnitude: e2.maxForceMagnitude(),
-        totalForce: e2.totalForce(),
-        totalForceMagnitude: e2.totalForceMagnitude()
-      });
-      rigidBodyDispatcher2?.("contact", {
-        targetCollider: collider1,
-        targetRigidBody: rigidBody1,
-        maxForceDirection: e2.maxForceDirection(),
-        maxForceMagnitude: e2.maxForceMagnitude(),
-        totalForce: e2.totalForce(),
-        totalForceMagnitude: e2.totalForceMagnitude()
-      });
-    });
-    eventQueue.drainCollisionEvents((handle1, handle2, started2) => {
-      const collider1 = world.getCollider(handle1);
-      const collider2 = world.getCollider(handle2);
-      if (!collider1 || !collider2) {
-        return;
-      }
-      const { colliderDispatcher1, colliderDispatcher2, rigidBodyDispatcher1, rigidBodyDispatcher2 } = getEventDispatchers(ctx, collider1, collider2);
-      if (!colliderDispatcher1 && !colliderDispatcher2 && !rigidBodyDispatcher1 && !rigidBodyDispatcher2) {
-        return;
-      }
-      const rigidBody1 = collider1.parent();
-      const rigidBody2 = collider2.parent();
-      if (started2) {
-        const isIntersection = world.intersectionPair(collider1, collider2);
-        if (isIntersection) {
-          colliderDispatcher1?.("sensorenter", {
-            targetCollider: collider2,
-            targetRigidBody: rigidBody2
-          });
-          colliderDispatcher2?.("sensorenter", {
-            targetCollider: collider1,
-            targetRigidBody: rigidBody1
-          });
-          rigidBodyDispatcher1?.("sensorenter", {
-            targetCollider: collider2,
-            targetRigidBody: rigidBody2
-          });
-          rigidBodyDispatcher2?.("sensorenter", {
-            targetCollider: collider1,
-            targetRigidBody: rigidBody1
-          });
-          return;
-        }
-        world.contactPair(collider1, collider2, (manifold, flipped) => {
-          colliderDispatcher1?.("collisionenter", {
-            flipped,
-            manifold,
-            targetCollider: collider2,
-            targetRigidBody: rigidBody2
-          });
-          colliderDispatcher2?.("collisionenter", {
-            flipped,
-            manifold,
-            targetCollider: collider1,
-            targetRigidBody: rigidBody1
-          });
-          rigidBodyDispatcher1?.("collisionenter", {
-            flipped,
-            manifold,
-            targetCollider: collider2,
-            targetRigidBody: rigidBody2
-          });
-          rigidBodyDispatcher2?.("collisionenter", {
-            flipped,
-            manifold,
-            targetCollider: collider1,
-            targetRigidBody: rigidBody1
-          });
-        });
-      } else {
-        const isIntersection = world.intersectionPair(collider1, collider2) || collider1.isSensor() || collider2.isSensor();
-        if (isIntersection) {
-          colliderDispatcher1?.("sensorexit", {
-            targetCollider: collider2,
-            targetRigidBody: rigidBody2
-          });
-          colliderDispatcher2?.("sensorexit", {
-            targetCollider: collider1,
-            targetRigidBody: rigidBody1
-          });
-          rigidBodyDispatcher1?.("sensorexit", {
-            targetCollider: collider2,
-            targetRigidBody: rigidBody2
-          });
-          rigidBodyDispatcher2?.("sensorexit", {
-            targetCollider: collider1,
-            targetRigidBody: rigidBody1
-          });
-          return;
-        }
-        colliderDispatcher1?.("collisionexit", {
-          targetCollider: collider2,
-          targetRigidBody: rigidBody2
-        });
-        colliderDispatcher2?.("collisionexit", {
-          targetCollider: collider1,
-          targetRigidBody: rigidBody1
-        });
-        rigidBodyDispatcher1?.("collisionexit", {
-          targetCollider: collider2,
-          targetRigidBody: rigidBody2
-        });
-        rigidBodyDispatcher2?.("collisionexit", {
-          targetCollider: collider1,
-          targetRigidBody: rigidBody1
-        });
-      }
-    });
-  }, { stage });
-  ctx.pause = () => stop();
-  ctx.resume = () => start();
-  ctx.paused = derived(started, (started2) => !started2);
-};
-const InnerWorld = create_ssr_component(($$result, $$props, $$bindings, slots) => {
-  let { gravity = [0, -9.81, 0] } = $$props;
-  let { rawIntegrationParameters = void 0 } = $$props;
-  let { rawIslands = void 0 } = $$props;
-  let { rawBroadPhase = void 0 } = $$props;
-  let { rawNarrowPhase = void 0 } = $$props;
-  let { rawBodies = void 0 } = $$props;
-  let { rawColliders = void 0 } = $$props;
-  let { rawImpulseJoints = void 0 } = $$props;
-  let { rawMultibodyJoints = void 0 } = $$props;
-  let { rawCCDSolver = void 0 } = $$props;
-  let { rawQueryPipeline = void 0 } = $$props;
-  let { rawPhysicsPipeline = void 0 } = $$props;
-  let { rawSerializationPipeline = void 0 } = $$props;
-  let { rawDebugRenderPipeline = void 0 } = $$props;
-  let { stage = void 0 } = $$props;
-  const rapierContext = createRapierContext(
-    {
-      x: gravity[0],
-      y: gravity[1],
-      z: gravity[2]
-    },
-    rawIntegrationParameters,
-    rawIslands,
-    rawBroadPhase,
-    rawNarrowPhase,
-    rawBodies,
-    rawColliders,
-    rawImpulseJoints,
-    rawMultibodyJoints,
-    rawCCDSolver,
-    rawQueryPipeline,
-    rawPhysicsPipeline,
-    rawSerializationPipeline,
-    rawDebugRenderPipeline
-  );
-  setContext("threlte-rapier-context", rapierContext);
-  useFrameHandler(rapierContext, stage);
-  onDestroy(async () => {
-    await tick();
-    rapierContext.world.free();
-  });
-  if ($$props.gravity === void 0 && $$bindings.gravity && gravity !== void 0)
-    $$bindings.gravity(gravity);
-  if ($$props.rawIntegrationParameters === void 0 && $$bindings.rawIntegrationParameters && rawIntegrationParameters !== void 0)
-    $$bindings.rawIntegrationParameters(rawIntegrationParameters);
-  if ($$props.rawIslands === void 0 && $$bindings.rawIslands && rawIslands !== void 0)
-    $$bindings.rawIslands(rawIslands);
-  if ($$props.rawBroadPhase === void 0 && $$bindings.rawBroadPhase && rawBroadPhase !== void 0)
-    $$bindings.rawBroadPhase(rawBroadPhase);
-  if ($$props.rawNarrowPhase === void 0 && $$bindings.rawNarrowPhase && rawNarrowPhase !== void 0)
-    $$bindings.rawNarrowPhase(rawNarrowPhase);
-  if ($$props.rawBodies === void 0 && $$bindings.rawBodies && rawBodies !== void 0)
-    $$bindings.rawBodies(rawBodies);
-  if ($$props.rawColliders === void 0 && $$bindings.rawColliders && rawColliders !== void 0)
-    $$bindings.rawColliders(rawColliders);
-  if ($$props.rawImpulseJoints === void 0 && $$bindings.rawImpulseJoints && rawImpulseJoints !== void 0)
-    $$bindings.rawImpulseJoints(rawImpulseJoints);
-  if ($$props.rawMultibodyJoints === void 0 && $$bindings.rawMultibodyJoints && rawMultibodyJoints !== void 0)
-    $$bindings.rawMultibodyJoints(rawMultibodyJoints);
-  if ($$props.rawCCDSolver === void 0 && $$bindings.rawCCDSolver && rawCCDSolver !== void 0)
-    $$bindings.rawCCDSolver(rawCCDSolver);
-  if ($$props.rawQueryPipeline === void 0 && $$bindings.rawQueryPipeline && rawQueryPipeline !== void 0)
-    $$bindings.rawQueryPipeline(rawQueryPipeline);
-  if ($$props.rawPhysicsPipeline === void 0 && $$bindings.rawPhysicsPipeline && rawPhysicsPipeline !== void 0)
-    $$bindings.rawPhysicsPipeline(rawPhysicsPipeline);
-  if ($$props.rawSerializationPipeline === void 0 && $$bindings.rawSerializationPipeline && rawSerializationPipeline !== void 0)
-    $$bindings.rawSerializationPipeline(rawSerializationPipeline);
-  if ($$props.rawDebugRenderPipeline === void 0 && $$bindings.rawDebugRenderPipeline && rawDebugRenderPipeline !== void 0)
-    $$bindings.rawDebugRenderPipeline(rawDebugRenderPipeline);
-  if ($$props.stage === void 0 && $$bindings.stage && stage !== void 0)
-    $$bindings.stage(stage);
-  {
-    if (gravity !== void 0) {
-      rapierContext.world.gravity = {
-        x: gravity[0],
-        y: gravity[1],
-        z: gravity[2]
-      };
-    }
-  }
-  return `${slots.default ? slots.default({}) : ``}`;
-});
-const initialized = writable(false);
-const World = create_ssr_component(($$result, $$props, $$bindings, slots) => {
-  let $initialized, $$unsubscribe_initialized;
-  $$unsubscribe_initialized = subscribe(initialized, (value) => $initialized = value);
-  let { gravity = void 0 } = $$props;
-  let { rawIntegrationParameters = void 0 } = $$props;
-  let { rawIslands = void 0 } = $$props;
-  let { rawBroadPhase = void 0 } = $$props;
-  let { rawNarrowPhase = void 0 } = $$props;
-  let { rawBodies = void 0 } = $$props;
-  let { rawColliders = void 0 } = $$props;
-  let { rawImpulseJoints = void 0 } = $$props;
-  let { rawMultibodyJoints = void 0 } = $$props;
-  let { rawCCDSolver = void 0 } = $$props;
-  let { rawQueryPipeline = void 0 } = $$props;
-  let { rawPhysicsPipeline = void 0 } = $$props;
-  let { rawSerializationPipeline = void 0 } = $$props;
-  let { rawDebugRenderPipeline = void 0 } = $$props;
-  let { stage = void 0 } = $$props;
-  if ($$props.gravity === void 0 && $$bindings.gravity && gravity !== void 0)
-    $$bindings.gravity(gravity);
-  if ($$props.rawIntegrationParameters === void 0 && $$bindings.rawIntegrationParameters && rawIntegrationParameters !== void 0)
-    $$bindings.rawIntegrationParameters(rawIntegrationParameters);
-  if ($$props.rawIslands === void 0 && $$bindings.rawIslands && rawIslands !== void 0)
-    $$bindings.rawIslands(rawIslands);
-  if ($$props.rawBroadPhase === void 0 && $$bindings.rawBroadPhase && rawBroadPhase !== void 0)
-    $$bindings.rawBroadPhase(rawBroadPhase);
-  if ($$props.rawNarrowPhase === void 0 && $$bindings.rawNarrowPhase && rawNarrowPhase !== void 0)
-    $$bindings.rawNarrowPhase(rawNarrowPhase);
-  if ($$props.rawBodies === void 0 && $$bindings.rawBodies && rawBodies !== void 0)
-    $$bindings.rawBodies(rawBodies);
-  if ($$props.rawColliders === void 0 && $$bindings.rawColliders && rawColliders !== void 0)
-    $$bindings.rawColliders(rawColliders);
-  if ($$props.rawImpulseJoints === void 0 && $$bindings.rawImpulseJoints && rawImpulseJoints !== void 0)
-    $$bindings.rawImpulseJoints(rawImpulseJoints);
-  if ($$props.rawMultibodyJoints === void 0 && $$bindings.rawMultibodyJoints && rawMultibodyJoints !== void 0)
-    $$bindings.rawMultibodyJoints(rawMultibodyJoints);
-  if ($$props.rawCCDSolver === void 0 && $$bindings.rawCCDSolver && rawCCDSolver !== void 0)
-    $$bindings.rawCCDSolver(rawCCDSolver);
-  if ($$props.rawQueryPipeline === void 0 && $$bindings.rawQueryPipeline && rawQueryPipeline !== void 0)
-    $$bindings.rawQueryPipeline(rawQueryPipeline);
-  if ($$props.rawPhysicsPipeline === void 0 && $$bindings.rawPhysicsPipeline && rawPhysicsPipeline !== void 0)
-    $$bindings.rawPhysicsPipeline(rawPhysicsPipeline);
-  if ($$props.rawSerializationPipeline === void 0 && $$bindings.rawSerializationPipeline && rawSerializationPipeline !== void 0)
-    $$bindings.rawSerializationPipeline(rawSerializationPipeline);
-  if ($$props.rawDebugRenderPipeline === void 0 && $$bindings.rawDebugRenderPipeline && rawDebugRenderPipeline !== void 0)
-    $$bindings.rawDebugRenderPipeline(rawDebugRenderPipeline);
-  if ($$props.stage === void 0 && $$bindings.stage && stage !== void 0)
-    $$bindings.stage(stage);
-  $$unsubscribe_initialized();
-  return `${$initialized ? `${validate_component(InnerWorld, "InnerWorld").$$render(
-    $$result,
-    {
-      gravity,
-      rawIntegrationParameters,
-      rawIslands,
-      rawBroadPhase,
-      rawNarrowPhase,
-      rawBodies,
-      rawColliders,
-      rawImpulseJoints,
-      rawMultibodyJoints,
-      rawCCDSolver,
-      rawQueryPipeline,
-      rawPhysicsPipeline,
-      rawSerializationPipeline,
-      rawDebugRenderPipeline,
-      stage
-    },
-    {},
-    {
-      default: () => {
-        return `${slots.default ? slots.default({}) : ``}`;
-      }
-    }
-  )}` : ``} ${``}`;
-});
-const useHasEventListeners = () => {
-  const component = get_current_component();
-  const hasEventListeners = (type) => {
-    const callbacks = component.$$.callbacks;
-    return type in callbacks && callbacks[type].length > 0;
-  };
-  return {
-    hasEventListeners
-  };
-};
-const tempPosition = new Vector3();
-const tempQuaternion = new Quaternion();
+new Object3D();
+new Vector3();
+new Vector3();
 new Euler();
-const tempScale = new Vector3();
-const getWorldPosition = (object, target) => {
-  return object.getWorldPosition(target ?? tempPosition);
-};
-const getWorldQuaternion = (object, target) => {
-  return object.getWorldQuaternion(target ?? tempQuaternion);
-};
-const getWorldScale = (object, target) => {
-  return object.getWorldScale(target ?? tempScale);
-};
-const rigidBodyTypeMap = {
+new Vector3();
+({
   dynamic: RigidBodyType.Dynamic,
   fixed: RigidBodyType.Fixed,
   kinematicPosition: RigidBodyType.KinematicPositionBased,
   kinematicVelocity: RigidBodyType.KinematicVelocityBased
-};
-const parseRigidBodyType = (type) => {
-  return rigidBodyTypeMap[type];
-};
-const key = Symbol("threlte-rapier-rigidbody-object3d");
-const useParentRigidbodyObject = () => {
-  return getContext(key);
-};
-const setParentRigidbodyObject = (object3d) => {
-  setContext(key, object3d);
-};
-const useCreateEvent = () => {
-  const dispatchRaw = createRawEventDispatcher();
-  const cleanupFunctions = [];
-  let ref = void 0;
-  const dispatchCreateEvent = () => {
-    cleanupFunctions.forEach((cleanup2) => cleanup2());
-    cleanupFunctions.length = 0;
-    const cleanup = (callback) => {
-      cleanupFunctions.push(callback);
-    };
-    if (ref === void 0)
-      return;
-    dispatchRaw("create", { ref, cleanup });
-  };
-  const updateRef = (newRef) => {
-    ref = newRef;
-    dispatchCreateEvent();
-  };
-  onDestroy(() => {
-    cleanupFunctions.forEach((cleanup) => cleanup());
-  });
-  return {
-    updateRef
-  };
-};
-const RigidBody = create_ssr_component(($$result, $$props, $$bindings, slots) => {
-  const { world, rapier, addRigidBodyToContext, removeRigidBodyFromContext } = useRapier();
-  let { linearVelocity = void 0 } = $$props;
-  let { angularVelocity = void 0 } = $$props;
-  let { type = "dynamic" } = $$props;
-  let { canSleep = true } = $$props;
-  let { gravityScale = 1 } = $$props;
-  let { ccd = false } = $$props;
-  let { angularDamping = 0 } = $$props;
-  let { linearDamping = 0 } = $$props;
-  let { lockRotations = false } = $$props;
-  let { lockTranslations = false } = $$props;
-  let { enabledRotations = [true, true, true] } = $$props;
-  let { enabledTranslations = [true, true, true] } = $$props;
-  let { dominance = 0 } = $$props;
-  let { enabled = true } = $$props;
-  let { userData = {} } = $$props;
-  const dispatcher = createRawEventDispatcher();
-  const { updateRef } = useCreateEvent();
-  const object = new Object3D();
-  object.userData.isSleeping = false;
-  const desc = new rapier.RigidBodyDesc(parseRigidBodyType(type)).setCanSleep(canSleep);
-  let { rigidBody = void 0 } = $$props;
-  const rigidBodyTemp = world.createRigidBody(desc);
-  const initPosition = async () => {
-    await tick();
-    object.updateMatrix();
-    object.updateWorldMatrix(true, false);
-    const parentWorldScale = object.parent ? getWorldScale(object.parent) : new Vector3(1, 1, 1);
-    const worldPosition2 = getWorldPosition(object).multiply(parentWorldScale);
-    const worldQuaternion2 = getWorldQuaternion(object);
-    rigidBodyTemp.setTranslation(worldPosition2, true);
-    rigidBodyTemp.setRotation(worldQuaternion2, true);
-    rigidBody = rigidBodyTemp;
-    updateRef(rigidBody);
-  };
-  initPosition();
-  object.userData.rigidBody = rigidBodyTemp;
-  const { hasEventListeners } = useHasEventListeners();
-  setContext("threlte-rapier-rigidbody", rigidBodyTemp);
-  setParentRigidbodyObject(object);
-  addRigidBodyToContext(rigidBodyTemp, object, dispatcher);
-  onDestroy(() => {
-    removeRigidBodyFromContext(rigidBodyTemp);
-    world.removeRigidBody(rigidBodyTemp);
-  });
-  if ($$props.linearVelocity === void 0 && $$bindings.linearVelocity && linearVelocity !== void 0)
-    $$bindings.linearVelocity(linearVelocity);
-  if ($$props.angularVelocity === void 0 && $$bindings.angularVelocity && angularVelocity !== void 0)
-    $$bindings.angularVelocity(angularVelocity);
-  if ($$props.type === void 0 && $$bindings.type && type !== void 0)
-    $$bindings.type(type);
-  if ($$props.canSleep === void 0 && $$bindings.canSleep && canSleep !== void 0)
-    $$bindings.canSleep(canSleep);
-  if ($$props.gravityScale === void 0 && $$bindings.gravityScale && gravityScale !== void 0)
-    $$bindings.gravityScale(gravityScale);
-  if ($$props.ccd === void 0 && $$bindings.ccd && ccd !== void 0)
-    $$bindings.ccd(ccd);
-  if ($$props.angularDamping === void 0 && $$bindings.angularDamping && angularDamping !== void 0)
-    $$bindings.angularDamping(angularDamping);
-  if ($$props.linearDamping === void 0 && $$bindings.linearDamping && linearDamping !== void 0)
-    $$bindings.linearDamping(linearDamping);
-  if ($$props.lockRotations === void 0 && $$bindings.lockRotations && lockRotations !== void 0)
-    $$bindings.lockRotations(lockRotations);
-  if ($$props.lockTranslations === void 0 && $$bindings.lockTranslations && lockTranslations !== void 0)
-    $$bindings.lockTranslations(lockTranslations);
-  if ($$props.enabledRotations === void 0 && $$bindings.enabledRotations && enabledRotations !== void 0)
-    $$bindings.enabledRotations(enabledRotations);
-  if ($$props.enabledTranslations === void 0 && $$bindings.enabledTranslations && enabledTranslations !== void 0)
-    $$bindings.enabledTranslations(enabledTranslations);
-  if ($$props.dominance === void 0 && $$bindings.dominance && dominance !== void 0)
-    $$bindings.dominance(dominance);
-  if ($$props.enabled === void 0 && $$bindings.enabled && enabled !== void 0)
-    $$bindings.enabled(enabled);
-  if ($$props.userData === void 0 && $$bindings.userData && userData !== void 0)
-    $$bindings.userData(userData);
-  if ($$props.rigidBody === void 0 && $$bindings.rigidBody && rigidBody !== void 0)
-    $$bindings.rigidBody(rigidBody);
-  rigidBodyTemp.userData = { hasEventListeners, ...userData };
-  {
-    rigidBodyTemp.setBodyType(parseRigidBodyType(type), true);
-  }
-  {
-    if (linearVelocity)
-      rigidBodyTemp.setLinvel(
-        {
-          x: linearVelocity[0],
-          y: linearVelocity[1],
-          z: linearVelocity[2]
-        },
-        true
-      );
-  }
-  {
-    if (angularVelocity)
-      rigidBodyTemp.setAngvel(
-        {
-          x: angularVelocity[0],
-          y: angularVelocity[1],
-          z: angularVelocity[2]
-        },
-        true
-      );
-  }
-  {
-    rigidBodyTemp.setGravityScale(gravityScale, true);
-  }
-  {
-    rigidBodyTemp.enableCcd(ccd);
-  }
-  {
-    rigidBodyTemp.setDominanceGroup(dominance);
-  }
-  {
-    rigidBodyTemp.lockRotations(lockRotations, true);
-  }
-  {
-    rigidBodyTemp.lockTranslations(lockTranslations, true);
-  }
-  {
-    rigidBodyTemp.setEnabledRotations(...enabledRotations, true);
-  }
-  {
-    rigidBodyTemp.setEnabledTranslations(...enabledTranslations, true);
-  }
-  {
-    rigidBodyTemp.setAngularDamping(angularDamping);
-  }
-  {
-    rigidBodyTemp.setLinearDamping(linearDamping);
-  }
-  {
-    rigidBodyTemp.setEnabled(enabled);
-  }
-  return `${validate_component(SceneGraphObject, "SceneGraphObject").$$render($$result, { object }, {}, {
-    default: () => {
-      return `${slots.default ? slots.default({ rigidBody }) : ``}`;
-    }
-  })}`;
 });
-const applyColliderActiveEvents = (collider, colliderHasEventListeners, rigidBodyHasEventListeners) => {
-  let events = 0;
-  if (colliderHasEventListeners("collisionenter") || colliderHasEventListeners("collisionexit") || rigidBodyHasEventListeners?.("collisionenter") || rigidBodyHasEventListeners?.("collisionexit") || colliderHasEventListeners("sensorenter") || colliderHasEventListeners("sensorexit") || rigidBodyHasEventListeners?.("sensorenter") || rigidBodyHasEventListeners?.("sensorexit")) {
-    events = events | ActiveEvents.COLLISION_EVENTS;
-  }
-  if (colliderHasEventListeners("contact") || rigidBodyHasEventListeners?.("contact")) {
-    events = events | ActiveEvents.CONTACT_FORCE_EVENTS;
-  }
-  if (events > 0) {
-    collider.setActiveEvents(events);
-  }
-};
-const e = new Euler();
-const q = new Quaternion();
-const eulerToQuaternion = (values) => {
-  e.set(...values);
-  return q.setFromEuler(e);
-};
-const offset = new Vector3();
-const worldPosition = new Vector3();
-const worldQuaternion = new Quaternion();
-const worldScale = new Vector3();
-const size = new Vector3();
-const rigidBodyWorldPos = new Vector3();
-const rigidBodyWorldQuatInversed = new Quaternion();
-const createCollidersFromChildren = (object, collidersType, world, rigidBody, rigidBodyParentObject) => {
-  const colliders = [];
-  let description;
-  rigidBodyWorldPos.set(0, 0, 0);
-  rigidBodyWorldQuatInversed.set(0, 0, 0, 1);
-  rigidBodyParentObject?.getWorldPosition(rigidBodyWorldPos);
-  rigidBodyParentObject?.getWorldQuaternion(rigidBodyWorldQuatInversed).invert();
-  object.traverse((child) => {
-    if ("isMesh" in child) {
-      const { geometry } = child;
-      const worldPos = child.getWorldPosition(worldPosition);
-      const translation = worldPos.sub(rigidBodyWorldPos);
-      const worldQuat = child.getWorldQuaternion(worldQuaternion);
-      const rotation = worldQuat.clone().premultiply(rigidBodyWorldQuatInversed);
-      const scale = child.getWorldScale(worldScale);
-      offset.set(0, 0, 0);
-      switch (collidersType) {
-        case "cuboid":
-          {
-            geometry.computeBoundingBox();
-            const { boundingBox } = geometry;
-            boundingBox.getSize(size);
-            boundingBox.getCenter(offset);
-            description = ColliderDesc.cuboid(size.x / 2 * scale.x, size.y / 2 * scale.y, size.z / 2 * scale.z);
-          }
-          break;
-        case "ball":
-          {
-            geometry.computeBoundingSphere();
-            const { boundingSphere } = geometry;
-            const radius2 = boundingSphere.radius * scale.x;
-            offset.copy(boundingSphere.center);
-            description = ColliderDesc.ball(radius2);
-          }
-          break;
-        case "trimesh":
-          {
-            description = ColliderDesc.trimesh(new Float32Array(geometry.attributes.position.array), new Uint32Array(geometry.index?.array ?? []));
-          }
-          break;
-        case "capsule":
-          {
-            geometry.computeBoundingBox();
-            const { boundingBox } = geometry;
-            boundingBox.getSize(size);
-            boundingBox.getCenter(offset);
-            const radius2 = Math.max(size.x / 2 * scale.x, size.z / 2 * scale.z);
-            description = ColliderDesc.capsule(size.y / 2 * scale.y - radius2, radius2);
-          }
-          break;
-        case "convexHull":
-          {
-            description = ColliderDesc.convexHull(new Float32Array(geometry.attributes.position.array));
-          }
-          break;
-      }
-      description.setTranslation(translation.x + offset.x, translation.y + offset.y, translation.z + offset.z).setRotation(rotation).setActiveEvents(ActiveEvents.COLLISION_EVENTS);
-      const collider = world.createCollider(description, rigidBody);
-      colliders.push(collider);
-    }
-  });
-  return colliders;
-};
-const AutoColliders = create_ssr_component(($$result, $$props, $$bindings, slots) => {
-  let { shape = "convexHull" } = $$props;
-  let { restitution = void 0 } = $$props;
-  let { restitutionCombineRule = void 0 } = $$props;
-  let { friction = void 0 } = $$props;
-  let { frictionCombineRule = void 0 } = $$props;
-  let { sensor = void 0 } = $$props;
-  let { contactForceEventThreshold = void 0 } = $$props;
-  let { density = void 0 } = $$props;
-  let { mass = void 0 } = $$props;
-  let { centerOfMass = void 0 } = $$props;
-  let { principalAngularInertia = void 0 } = $$props;
-  let { angularInertiaLocalFrame = void 0 } = $$props;
-  const group = new Group();
-  const { updateRef } = useCreateEvent();
-  const rigidBody = useRigidBody();
-  const rigidBodyParentObject = useParentRigidbodyObject();
-  const { world, addColliderToContext, removeColliderFromContext } = useRapier();
-  let { colliders = [] } = $$props;
-  const collisionGroups = useCollisionGroups();
-  const dispatcher = createRawEventDispatcher();
-  const { hasEventListeners: colliderHasEventListeners } = useHasEventListeners();
-  const cleanup = () => {
-    collisionGroups.removeColliders(colliders);
-    colliders.forEach((c) => {
-      removeColliderFromContext(c);
-      world.removeCollider(c, true);
-    });
-    colliders.length = 0;
-  };
-  const create = () => {
-    cleanup();
-    colliders = createCollidersFromChildren(group, shape ?? "convexHull", world, rigidBody, rigidBodyParentObject);
-    colliders.forEach((c) => addColliderToContext(c, group, dispatcher));
-    collisionGroups.registerColliders(colliders);
-    colliders.forEach((collider) => {
-      applyColliderActiveEvents(collider, colliderHasEventListeners, rigidBody?.userData?.hasEventListeners);
-      collider.setActiveCollisionTypes(ActiveCollisionTypes.ALL);
-      collider.setRestitution(restitution ?? 0);
-      collider.setRestitutionCombineRule(restitutionCombineRule ?? CoefficientCombineRule.Average);
-      collider.setFriction(friction ?? 0.7);
-      collider.setFrictionCombineRule(frictionCombineRule ?? CoefficientCombineRule.Average);
-      collider.setSensor(sensor ?? false);
-      collider.setContactForceEventThreshold(contactForceEventThreshold ?? 0);
-      if (density)
-        collider.setDensity(density);
-      if (mass) {
-        if (centerOfMass && principalAngularInertia && angularInertiaLocalFrame)
-          collider.setMassProperties(
-            mass,
-            {
-              x: centerOfMass[0],
-              y: centerOfMass[1],
-              z: centerOfMass[2]
-            },
-            {
-              x: principalAngularInertia[0],
-              y: principalAngularInertia[1],
-              z: principalAngularInertia[2]
-            },
-            eulerToQuaternion(angularInertiaLocalFrame)
-          );
-        else
-          collider.setMass(mass);
-      }
-    });
-    updateRef(colliders);
-  };
-  const refresh = () => {
-    create();
-  };
-  onDestroy(cleanup);
-  if ($$props.shape === void 0 && $$bindings.shape && shape !== void 0)
-    $$bindings.shape(shape);
-  if ($$props.restitution === void 0 && $$bindings.restitution && restitution !== void 0)
-    $$bindings.restitution(restitution);
-  if ($$props.restitutionCombineRule === void 0 && $$bindings.restitutionCombineRule && restitutionCombineRule !== void 0)
-    $$bindings.restitutionCombineRule(restitutionCombineRule);
-  if ($$props.friction === void 0 && $$bindings.friction && friction !== void 0)
-    $$bindings.friction(friction);
-  if ($$props.frictionCombineRule === void 0 && $$bindings.frictionCombineRule && frictionCombineRule !== void 0)
-    $$bindings.frictionCombineRule(frictionCombineRule);
-  if ($$props.sensor === void 0 && $$bindings.sensor && sensor !== void 0)
-    $$bindings.sensor(sensor);
-  if ($$props.contactForceEventThreshold === void 0 && $$bindings.contactForceEventThreshold && contactForceEventThreshold !== void 0)
-    $$bindings.contactForceEventThreshold(contactForceEventThreshold);
-  if ($$props.density === void 0 && $$bindings.density && density !== void 0)
-    $$bindings.density(density);
-  if ($$props.mass === void 0 && $$bindings.mass && mass !== void 0)
-    $$bindings.mass(mass);
-  if ($$props.centerOfMass === void 0 && $$bindings.centerOfMass && centerOfMass !== void 0)
-    $$bindings.centerOfMass(centerOfMass);
-  if ($$props.principalAngularInertia === void 0 && $$bindings.principalAngularInertia && principalAngularInertia !== void 0)
-    $$bindings.principalAngularInertia(principalAngularInertia);
-  if ($$props.angularInertiaLocalFrame === void 0 && $$bindings.angularInertiaLocalFrame && angularInertiaLocalFrame !== void 0)
-    $$bindings.angularInertiaLocalFrame(angularInertiaLocalFrame);
-  if ($$props.colliders === void 0 && $$bindings.colliders && colliders !== void 0)
-    $$bindings.colliders(colliders);
-  if ($$props.create === void 0 && $$bindings.create && create !== void 0)
-    $$bindings.create(create);
-  if ($$props.refresh === void 0 && $$bindings.refresh && refresh !== void 0)
-    $$bindings.refresh(refresh);
-  return `${validate_component(SceneGraphObject, "SceneGraphObject").$$render($$result, { object: group }, {}, {
-    default: () => {
-      return `${slots.default ? slots.default({ colliders, refresh }) : ``}`;
-    }
-  })}`;
-});
-const radius = 1;
+new Euler();
+new Vector3();
+new Vector3();
+new Vector3();
+new Vector3();
+new Vector3();
 const Scene2 = create_ssr_component(($$result, $$props, $$bindings, slots) => {
-  let $inputText, $$unsubscribe_inputText;
-  const inputText = writable("Hello, World!");
-  $$unsubscribe_inputText = subscribe(inputText, (value) => $inputText = value);
-  const shapes = [
-    {
-      geometry: new BoxGeometry(radius * Math.random(), radius * Math.random(), radius * Math.random()),
-      autoCollider: "cuboid",
-      color: "hotpink"
+  let $steps, $$unsubscribe_steps;
+  let $bpm, $$unsubscribe_bpm;
+  let $currentStep, $$unsubscribe_currentStep;
+  let $state, $$unsubscribe_state;
+  const steps = writable(16);
+  $$unsubscribe_steps = subscribe(steps, (value) => $steps = value);
+  const currentStep = writable(0);
+  $$unsubscribe_currentStep = subscribe(currentStep, (value) => $currentStep = value);
+  const state = writable(Tone.Transport.state);
+  $$unsubscribe_state = subscribe(state, (value) => $state = value);
+  new Tone.Synth().toDestination();
+  new Tone.FMSynth().toDestination();
+  new Tone.AMSynth().toDestination();
+  const bpm = writable(120);
+  $$unsubscribe_bpm = subscribe(bpm, (value) => $bpm = value);
+  new Tone.Players({
+    urls: {
+      0: "A1.mp3",
+      1: "Cs2.mp3",
+      2: "E2.mp3",
+      3: "Fs2.mp3"
     },
-    {
-      geometry: new SphereGeometry(radius * Math.random()),
-      autoCollider: "ball",
-      color: "cyan"
-    },
-    {
-      geometry: new CylinderGeometry(radius * Math.random(), radius * Math.random(), radius * 2),
-      autoCollider: "convexHull",
-      color: "lime"
-    },
-    {
-      geometry: new ConeGeometry(radius * Math.random(), radius * 3, 10),
-      autoCollider: "convexHull",
-      color: "orange"
+    fadeOut: "64n",
+    baseUrl: "https://tonejs.github.io/audio/casio/"
+  }).toDestination();
+  useTask(() => {
+    if ($state === "started") {
+      Tone.Transport.bpm.value = $bpm;
+      set_store_value(currentStep, $currentStep = Tone.Transport.seconds / 60 * $bpm % $steps, $currentStep);
+      Tone.Transport.start();
     }
-  ];
-  new Array(50).fill(0).map((_, index) => {
-    const position = [Math.random() * 5 - 2.5, Math.random() * 5, Math.random() * 5 - 2.5];
-    const rotation = [Math.random() * 10, Math.random() * 10, Math.random() * 10];
-    const shape = shapes[Math.floor(Math.random() * shapes.length)];
-    return { id: index, position, rotation, ...shape };
   });
-  $$unsubscribe_inputText();
-  return `${validate_component(World, "World").$$render($$result, {}, {}, {
+  $$unsubscribe_steps();
+  $$unsubscribe_bpm();
+  $$unsubscribe_currentStep();
+  $$unsubscribe_state();
+  return `${validate_component(T.PerspectiveCamera, "T.PerspectiveCamera").$$render($$result, { position: [0, 1, 10], makeDefault: true }, {}, {
     default: () => {
-      return `${validate_component(T.PerspectiveCamera, "T.PerspectiveCamera").$$render($$result, { position: [0, 3, 10], makeDefault: true }, {}, {
+      return `${validate_component(OrbitControls2, "OrbitControls").$$render($$result, {}, {}, {})}`;
+    }
+  })} ${validate_component(T.AmbientLight, "T.AmbientLight").$$render($$result, { intensity: 0.5 }, {}, {})} ${validate_component(T.Group, "T.Group").$$render($$result, {}, {}, {
+    default: () => {
+      return `${each(Array($steps), (step, i) => {
+        return `${validate_component(T.Mesh, "T.Mesh").$$render($$result, { position: [i - $steps / 2, 0, 0] }, {}, {
+          default: () => {
+            return `${validate_component(T.BoxGeometry, "T.BoxGeometry").$$render($$result, { args: [1 / 2, 1, 1 / 4] }, {}, {})} ${validate_component(T.MeshStandardMaterial, "T.MeshStandardMaterial").$$render(
+              $$result,
+              {
+                color: Math.floor($currentStep) === i ? "orange" : "violet"
+              },
+              {},
+              {}
+            )} ${Math.floor($currentStep) === i ? `${validate_component(T.PointLight, "T.PointLight").$$render($$result, { position: [0, 2, 0], intensity: 1 }, {}, {})}` : ``} `;
+          }
+        })}`;
+      })} ${validate_component(HTML, "HTML").$$render($$result, { transform: true, position: [-6, 3, 0] }, {}, {
         default: () => {
-          return `${validate_component(OrbitControls2, "OrbitControls").$$render(
-            $$result,
-            {
-              "target.y": 1,
-              maxPolarAngle: Math.PI * 0.4
-            },
-            {},
-            {}
-          )}`;
-        }
-      })} ${validate_component(ContactShadows, "ContactShadows").$$render($$result, {}, {}, {})} ${validate_component(T.AmbientLight, "T.AmbientLight").$$render($$result, { intensity: 0.5 }, {}, {})} ${validate_component(T.DirectionalLight, "T.DirectionalLight").$$render(
-        $$result,
-        {
-          position: [1, 1, 1],
-          intensity: 0.1,
-          castShadow: true
-        },
-        {},
-        {}
-      )} ${validate_component(T.DirectionalLight, "T.DirectionalLight").$$render(
-        $$result,
-        {
-          position: [-1, 1, 1],
-          intensity: 0.1,
-          castShadow: true
-        },
-        {},
-        {}
-      )} ${validate_component(T.Group, "T.Group").$$render($$result, {}, {}, {
-        default: () => {
-          return `${validate_component(RigidBody, "RigidBody").$$render($$result, {}, {}, {
-            default: () => {
-              return `${validate_component(AutoColliders, "AutoColliders").$$render($$result, { shape: "cuboid", restitution: 0.5 }, {}, {
-                default: () => {
-                  return `${validate_component(T.Mesh, "T.Mesh").$$render($$result, { position: [0, 3, 0] }, {}, {
-                    default: () => {
-                      return `${validate_component(HTML, "HTML").$$render($$result, { position: [0, 0.5, 0], scale: 0.25 }, {}, {
-                        default: () => {
-                          return `<div class="w-full h-auto p-5 text-2xl text-purple-400 bg-gray-800"><p>Output: ${escape$1($inputText)}</p></div>`;
-                        }
-                      })} ${validate_component(T.BoxGeometry, "T.BoxGeometry").$$render($$result, { args: [1, 1, 1] }, {}, {})} ${validate_component(T.MeshStandardMaterial, "T.MeshStandardMaterial").$$render($$result, { color: "hotpink" }, {}, {})}`;
-                    }
-                  })}`;
-                }
-              })}`;
-            }
-          })}`;
-        }
-      })} ${validate_component(T.Group, "T.Group").$$render($$result, {}, {}, {
-        default: () => {
-          return `${validate_component(RigidBody, "RigidBody").$$render($$result, { type: "fixed" }, {}, {
-            default: () => {
-              return `${validate_component(AutoColliders, "AutoColliders").$$render($$result, { shape: "cuboid", restitution: 1.5 }, {}, {
-                default: () => {
-                  return `${validate_component(T.Mesh, "T.Mesh").$$render(
-                    $$result,
-                    {
-                      rotation: [-Math.PI / 2, 0, 0],
-                      position: [0, 1, 0],
-                      receiveShadow: true
-                    },
-                    {},
-                    {
-                      default: () => {
-                        return `${validate_component(T.PlaneGeometry, "T.PlaneGeometry").$$render($$result, { args: [100, 100] }, {}, {})} ${validate_component(T.MeshStandardMaterial, "T.MeshStandardMaterial").$$render($$result, { color: "purple" }, {}, {})} ${validate_component(HTML, "HTML").$$render(
-                          $$result,
-                          {
-                            transform: true,
-                            position: [0, -4, -2],
-                            scale: 0.5
-                          },
-                          {},
-                          {
-                            default: () => {
-                              return `<div class="w-full h-auto p-5 text-2xl text-purple-400 bg-gray-800"><label for="input">Input: <input${add_attribute("value", $inputText, 0)}></label></div>`;
-                            }
-                          }
-                        )}`;
-                      }
-                    }
-                  )}`;
-                }
-              })}`;
-            }
-          })}`;
+          return `<div class="bg-slate-200"><p class="p-2 bg-slate-500">Current Step: ${escape$1(Math.floor($currentStep) + 1)}</p> <button class="shadow-inner bg-slate-500 p-4 rounded-sm m-4">${escape$1($state === "started" ? "Pause" : "Play")}</button> <label class="text-pretty bg-slate-500 m-2 p-2 w-1/2 inline-block" for="bpm">BPM: <input id="bpm" type="number" min="50" max="300"${add_attribute("value", $bpm, 0)}></label></div>`;
         }
       })}`;
     }
   })}`;
 });
 const App = create_ssr_component(($$result, $$props, $$bindings, slots) => {
-  return `<div class="w-full h-auto p-5 text-2xl text-purple-400 bg-gray-800" data-svelte-h="svelte-1o3720">This is an HTML element inside <span class="bg-slate-200 text-purple-950 w-auto font-mono p-1 rounded-sm">src/components/App.svelte</span></div> ${validate_component(Canvas, "Canvas").$$render($$result, {}, {}, {
+  return `<div class="w-full h-auto p-5 text-2xl text-purple-400 bg-gray-800" data-svelte-h="svelte-1qtr5g8">Tone / Threlte Sequencer (wip)</div> ${validate_component(Canvas, "Canvas").$$render($$result, {}, {}, {
     default: () => {
       return `${validate_component(Scene2, "Scene").$$render($$result, {}, {}, {})}`;
     }
